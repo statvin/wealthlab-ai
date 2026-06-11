@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wealthlab-core"
+version = "0.1.0"
+description = "Motor quantitativo de wealth management com simulacao estocastica multiativos (realidade brasileira)."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "Vinicius Ramos" }]
+dependencies = [
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "scipy>=1.13",
+    "pydantic>=2.7",
+]
+
+[project.optional-dependencies]
+# yfinance fica como extra: o nucleo NAO depende de rede para rodar/testar.
+market = ["yfinance>=0.2.40"]
+dev = [
+    "pytest>=8.0",
+    "pytest-benchmark>=4.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["wealthlab_core*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

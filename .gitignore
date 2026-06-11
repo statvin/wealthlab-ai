@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Ambiente virtual
+.venv/
+venv/
+
+# Dados / cache (nao versionar histórico baixado nem o cache SQLite)
+*.sqlite
+*.sqlite3
+*.db
+data/cache/
+.env
+
+# Testes / cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / SO
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
