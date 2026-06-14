@@ -14,9 +14,9 @@ Python puro, testável sem rede e sem UI.
 | Fase | Entrega | Status |
 |------|---------|--------|
 | **1** | Domínio + market data com cache + motor t-Student + renda fixa + fluxos/inflação/rebalanceamento | ✅ concluída |
-| 2 | VaR/CVaR, ruína, meta, drawdown, contribuição ao risco | ⏳ |
-| 3 | Stress por parâmetros chocados | ⏳ |
-| 4 | API FastAPI + SQLite + migrations | ⏳ |
+| **2** | VaR/CVaR, ruína, meta, drawdown, contribuição ao risco | ✅ concluída |
+| **3** | Stress por parâmetros chocados | ✅ concluída |
+| **4** | API FastAPI + SQLite + migrations | ✅ concluída |
 | 5 | Dashboard React/TS | ⏳ |
 | 6 | Insights + rebalanceamento (+ aposentadoria) | ⏳ |
 
@@ -37,7 +37,37 @@ pytest -q
 ```
 
 Veja `examples/demo_fase1.py` para um exemplo completo (estimação de parâmetros a
-partir de dados sintéticos → simulação → percentis do patrimônio).
+partir de dados sintéticos → simulação → percentis do patrimônio). Há também
+`demo_fase2.py` (risco) e `demo_fase3.py` (stress, Base vs. Stress).
+
+## API (Fase 4)
+
+Casca fina FastAPI sobre o motor. Instale o extra e rode as migrations antes de
+subir o servidor:
+
+```powershell
+pip install -e ".[api]"
+alembic upgrade head                 # cria o schema no SQLite
+uvicorn wealthlab_api.main:app --reload
+# Swagger interativo em http://127.0.0.1:8000/docs
+```
+
+Endpoints:
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/portfolio` | cria carteira (valida pelas regras do domínio) |
+| GET | `/portfolio/{id}` | consulta carteira |
+| POST | `/simulation/run` | roda a simulação (síncrono) e persiste com a seed |
+| GET | `/simulation/{id}/results` | resumo + funil (amostra + bandas P5..P95) |
+| GET | `/simulation/{id}/risk-analysis` | VaR/CVaR, ruína, meta, drawdown, contribuição |
+| GET | `/simulation/{id}/stress-test` | Base vs. Stress (query `presets=2008,COVID-2020`) |
+| GET | `/methodology` | premissas da aba Metodologia |
+
+A simulação grava `seed` + entradas, então a mesma requisição é **reproduzível**.
+Persistência: inputs + seed + métricas resumidas + ~100 trajetórias e bandas (o
+suficiente para o funil da Fase 5), sem guardar o array bruto completo.
+`/simulation/{id}/rebalance` fica para a Fase 6 (depende do motor de recomendação).
 
 ---
 
