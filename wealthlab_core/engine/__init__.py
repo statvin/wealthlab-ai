@@ -15,6 +15,22 @@ from wealthlab_core.engine.simulator import (
     SimulationResult,
     simular_portfolio,
 )
+from wealthlab_core.engine.metrics import (
+    ContribuicaoRisco,
+    Drawdown,
+    RiskAnalysis,
+    VaRCVaR,
+    analisar_risco,
+    contribuicao_ao_risco,
+    estatisticas_drawdown,
+    matriz_covariancia_anual,
+    max_drawdown_por_trajetoria,
+    pesos_iniciais,
+    prob_meta,
+    prob_ruina,
+    simular_retornos_1ano,
+    var_cvar,
+)
 
 __all__ = [
     "EstimatedParams",
@@ -27,4 +43,18 @@ __all__ = [
     "gerar_log_retornos_rv",
     "SimulationResult",
     "simular_portfolio",
+    "VaRCVaR",
+    "Drawdown",
+    "ContribuicaoRisco",
+    "RiskAnalysis",
+    "var_cvar",
+    "simular_retornos_1ano",
+    "prob_ruina",
+    "prob_meta",
+    "max_drawdown_por_trajetoria",
+    "estatisticas_drawdown",
+    "pesos_iniciais",
+    "matriz_covariancia_anual",
+    "contribuicao_ao_risco",
+    "analisar_risco",
 ]
