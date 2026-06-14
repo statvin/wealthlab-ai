@@ -31,6 +31,17 @@ from wealthlab_core.engine.metrics import (
     simular_retornos_1ano,
     var_cvar,
 )
+from wealthlab_core.engine.stress import (
+    PRESETS,
+    StressComparison,
+    StressScenario,
+    aplicar_correlacao_alvo,
+    comparar_base_vs_stress,
+    estressar_juros,
+    estressar_parametros,
+    precos_com_haircut,
+    rodar_cenario_stress,
+)
 
 __all__ = [
     "EstimatedParams",
@@ -57,4 +68,13 @@ __all__ = [
     "matriz_covariancia_anual",
     "contribuicao_ao_risco",
     "analisar_risco",
+    "StressScenario",
+    "StressComparison",
+    "PRESETS",
+    "aplicar_correlacao_alvo",
+    "estressar_parametros",
+    "estressar_juros",
+    "precos_com_haircut",
+    "rodar_cenario_stress",
+    "comparar_base_vs_stress",
 ]
