@@ -17,7 +17,7 @@ Python puro, testável sem rede e sem UI.
 | **2** | VaR/CVaR, ruína, meta, drawdown, contribuição ao risco | ✅ concluída |
 | **3** | Stress por parâmetros chocados | ✅ concluída |
 | **4** | API FastAPI + SQLite + migrations | ✅ concluída |
-| 5 | Dashboard React/TS | ⏳ |
+| **5** | Dashboard React/TS | ✅ concluída |
 | 6 | Insights + rebalanceamento (+ aposentadoria) | ⏳ |
 
 ## Instalação
@@ -68,6 +68,30 @@ A simulação grava `seed` + entradas, então a mesma requisição é **reproduz
 Persistência: inputs + seed + métricas resumidas + ~100 trajetórias e bandas (o
 suficiente para o funil da Fase 5), sem guardar o array bruto completo.
 `/simulation/{id}/rebalance` fica para a Fase 6 (depende do motor de recomendação).
+
+## Frontend (Fase 5)
+
+Dashboard React + TypeScript + Vite + TailwindCSS + Plotly.js (tema escuro). Cliente
+da API tipado à mão; estado via hooks próprios (sem libs externas). Gráficos: funil
+de Monte Carlo (100 trajetórias + bandas P5..P95), heatmap de correlação, histograma
+dos patrimônios finais, KPIs com tooltips e aba Metodologia.
+
+Para a demo rodar **offline** (sem depender do Yahoo), popule o cache de preços:
+
+```powershell
+# 1) Backend (a partir da raiz do projeto)
+pip install -e ".[api]"
+alembic upgrade head
+python scripts/seed_cache.py          # cache sintético dos tickers da carteira-modelo
+uvicorn wealthlab_api.main:app --port 8000
+
+# 2) Frontend (em frontend/)
+npm install
+npm run dev                           # http://localhost:5173 (proxy /api -> :8000)
+```
+
+`npm run build` (typecheck + bundle) e `npm test` (Vitest + Testing Library) validam o
+front. O dev server faz proxy de `/api` para o FastAPI, então não há CORS no dev.
 
 ---
 

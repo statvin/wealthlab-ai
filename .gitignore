@@ -10,6 +10,13 @@ dist/
 .venv/
 venv/
 
+# Node / frontend
+node_modules/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+.env.local
+
 # Dados / cache (nao versionar histórico baixado nem o cache SQLite)
 *.sqlite
 *.sqlite3
@@ -21,6 +28,9 @@ data/cache/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Ferramentas locais (launch configs com caminhos absolutos da máquina)
+.claude/
 
 # IDE / SO
 .vscode/

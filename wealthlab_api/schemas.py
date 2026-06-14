@@ -102,7 +102,9 @@ class SimulationRunResponse(BaseModel):
 class ResultsOut(BaseModel):
     id: int
     resumo: dict
-    funil: dict   # meses, amostra de trajetórias, bandas de percentis
+    funil: dict          # meses, amostra de trajetórias, bandas de percentis
+    histograma: dict     # edges + counts dos patrimônios finais nominais
+    correlacao: dict     # labels + matriz (correlação da renda variável)
 
 
 class VaRCVaROut(BaseModel):

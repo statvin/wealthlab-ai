@@ -155,10 +155,17 @@ def test_rodar_simulacao_e_resultados(client):
 
     res = client.get(f"/simulation/{sim_id}/results")
     assert res.status_code == 200
-    funil = res.json()["funil"]
+    body = res.json()
+    funil = body["funil"]
     assert len(funil["meses"]) == 121  # 10 anos * 12 + 1
     assert len(funil["amostra"]) == 100
     assert set(funil["bandas"]) == {"p5", "p10", "p50", "p90", "p95"}
+    # histograma dos finais
+    assert len(body["histograma"]["counts"]) == 40
+    assert len(body["histograma"]["edges"]) == 41
+    # correlação da renda variável (AAA, BBB) -> matriz 2x2
+    assert body["correlacao"]["labels"] == ["AAA", "BBB"]
+    assert len(body["correlacao"]["matriz"]) == 2
 
 
 def test_reprodutibilidade_por_seed(client):

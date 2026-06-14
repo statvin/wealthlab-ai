@@ -38,7 +38,11 @@ def rodar(
 def resultados(sim_id: int, db: Session = Depends(get_db)):
     sim = _get_sim_ou_404(db, sim_id)
     return schemas.ResultsOut(
-        id=sim.id, resumo=sim.resultado["resumo"], funil=sim.resultado["funil"]
+        id=sim.id,
+        resumo=sim.resultado["resumo"],
+        funil=sim.resultado["funil"],
+        histograma=sim.resultado["histograma"],
+        correlacao=sim.resultado["correlacao"],
     )
 
 

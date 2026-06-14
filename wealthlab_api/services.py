@@ -153,6 +153,7 @@ def montar_resultado(
     result: SimulationResult,
     risk,
     goal: FinancialGoal | None,
+    params: EstimatedParams | None = None,
 ) -> dict:
     traj = result.trajetorias_nominais
     traj_real = result.trajetorias_reais()
@@ -175,6 +176,17 @@ def montar_resultado(
         "bandas": bandas,
     }
 
+    # Histograma dos patrimônios finais nominais (para o gráfico de distribuição).
+    counts, edges = np.histogram(finais, bins=40)
+    histograma = {"edges": edges.tolist(), "counts": counts.tolist()}
+
+    # Matriz de correlação da renda variável (para o heatmap). RF não tem
+    # correlação no modelo base, então só os ativos de RV aparecem.
+    if params is not None:
+        correlacao = {"labels": list(params.tickers), "matriz": params.corr.tolist()}
+    else:
+        correlacao = {"labels": [], "matriz": []}
+
     risco = {
         "var_cvar": [
             {"nivel": vc.nivel, "var": vc.var, "cvar": vc.cvar}
@@ -195,7 +207,13 @@ def montar_resultado(
             "por_classe": {c.value: v for c, v in risk.contribuicao.por_classe.items()},
         },
     }
-    return {"resumo": resumo, "funil": funil, "risco": risco}
+    return {
+        "resumo": resumo,
+        "funil": funil,
+        "histograma": histograma,
+        "correlacao": correlacao,
+        "risco": risco,
+    }
 
 
 # --------------------------------------------------------------------------
@@ -241,7 +259,7 @@ def executar_simulacao(
         dominio_pf, config, juros, params_rv=params, cashflow=cashflow,
         target=target, precos_iniciais=precos, goal=goal, result=result,
     )
-    resultado = montar_resultado(result, risk, goal)
+    resultado = montar_resultado(result, risk, goal, params)
 
     config_orm = repository.create_config(db, request.config)
     entradas = {

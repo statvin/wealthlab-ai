@@ -1,0 +1,242 @@
+// Editor da carteira do usuário: adiciona/remove ativos por classe. A carteira
+// montada aqui é o que o sistema simula (vira POST /portfolio).
+
+import { useState } from 'react'
+
+import type { AssetClass, HoldingDTO, Indexador } from '../api/types'
+import { fmtBRL, fmtPct } from '../lib/format'
+import { CLASSE_LABEL, CLASSES, ehRendaFixa, valorHolding, valorTotal } from '../lib/portfolio'
+
+const INDEXADORES: Indexador[] = ['CDI', 'SELIC', 'IPCA', 'PREFIXADO']
+
+const NOVO_VAZIO = {
+  ticker: '',
+  nome: '',
+  classe: 'EQUITY_BR' as AssetClass,
+  quantidade: 0,
+  preco_inicial: 0,
+  indexador: 'CDI' as Indexador,
+  taxa_contratada: 1.0,
+  duration_anos: 0,
+}
+
+const inputCls =
+  'w-full rounded-lg border border-base-600 bg-base-900 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none'
+
+export function PortfolioEditor({
+  holdings,
+  onChange,
+}: {
+  holdings: HoldingDTO[]
+  onChange: (h: HoldingDTO[]) => void
+}) {
+  const [novo, setNovo] = useState(NOVO_VAZIO)
+  const [erro, setErro] = useState<string | null>(null)
+  const total = valorTotal(holdings)
+  const rf = ehRendaFixa(novo.classe)
+
+  function adicionar() {
+    const ticker = novo.ticker.trim()
+    if (!ticker) return setErro('Informe o ticker (ex.: WEGE3.SA, BTC-USD).')
+    if (novo.quantidade <= 0) return setErro('Quantidade deve ser maior que zero.')
+    if (novo.preco_inicial <= 0) return setErro('Preço inicial deve ser maior que zero.')
+    if (holdings.some((h) => h.asset.ticker === ticker))
+      return setErro('Esse ticker já está na carteira.')
+
+    const holding: HoldingDTO = {
+      asset: {
+        ticker,
+        nome: novo.nome.trim() || ticker,
+        classe: novo.classe,
+        fixed_income_terms: rf
+          ? {
+              indexador: novo.indexador,
+              taxa_contratada: novo.taxa_contratada,
+              duration_anos: novo.duration_anos,
+            }
+          : null,
+      },
+      quantidade: novo.quantidade,
+      preco_inicial: novo.preco_inicial,
+    }
+    onChange([...holdings, holding])
+    setNovo(NOVO_VAZIO)
+    setErro(null)
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="card">
+        <h3 className="mb-3 text-sm font-semibold text-slate-300">Minha carteira</h3>
+        {holdings.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            Carteira vazia. Adicione ativos abaixo para simular sobre eles.
+          </p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-slate-400">
+                <th className="font-medium">Classe</th>
+                <th className="font-medium">Ativo</th>
+                <th className="font-medium text-right">Qtd</th>
+                <th className="font-medium text-right">Preço</th>
+                <th className="font-medium text-right">Valor</th>
+                <th className="font-medium text-right">Peso</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {holdings.map((h) => (
+                <tr key={h.asset.ticker} className="border-t border-base-600/50">
+                  <td className="py-1 text-slate-400">{CLASSE_LABEL[h.asset.classe]}</td>
+                  <td className="py-1">
+                    <span className="font-medium text-slate-100">{h.asset.ticker}</span>
+                    {h.asset.fixed_income_terms && (
+                      <span className="ml-1 text-xs text-slate-500">
+                        {h.asset.fixed_income_terms.indexador} {h.asset.fixed_income_terms.taxa_contratada}
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-1 text-right">{h.quantidade}</td>
+                  <td className="py-1 text-right">{fmtBRL(h.preco_inicial ?? 1)}</td>
+                  <td className="py-1 text-right">{fmtBRL(valorHolding(h))}</td>
+                  <td className="py-1 text-right text-slate-400">
+                    {total > 0 ? fmtPct(valorHolding(h) / total) : '—'}
+                  </td>
+                  <td className="py-1 text-right">
+                    <button
+                      onClick={() => onChange(holdings.filter((x) => x.asset.ticker !== h.asset.ticker))}
+                      className="text-rose-400 hover:text-rose-300"
+                      aria-label={`Remover ${h.asset.ticker}`}
+                    >
+                      ✕
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              <tr className="border-t border-base-600">
+                <td colSpan={4} className="py-1 font-medium text-slate-300">
+                  Total
+                </td>
+                <td className="py-1 text-right font-medium text-slate-100">{fmtBRL(total)}</td>
+                <td colSpan={2} />
+              </tr>
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div className="card">
+        <h3 className="mb-3 text-sm font-semibold text-slate-300">Adicionar ativo</h3>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <label className="block">
+            <span className="label">Classe</span>
+            <select
+              value={novo.classe}
+              onChange={(e) => setNovo({ ...novo, classe: e.target.value as AssetClass })}
+              className={`mt-1 ${inputCls}`}
+            >
+              {CLASSES.map((c) => (
+                <option key={c} value={c}>
+                  {CLASSE_LABEL[c]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="label">Ticker</span>
+            <input
+              value={novo.ticker}
+              placeholder={rf ? 'ex.: TD-IPCA-2035' : 'ex.: WEGE3.SA'}
+              onChange={(e) => setNovo({ ...novo, ticker: e.target.value })}
+              className={`mt-1 ${inputCls}`}
+            />
+          </label>
+
+          <label className="block">
+            <span className="label">Nome (opcional)</span>
+            <input
+              value={novo.nome}
+              onChange={(e) => setNovo({ ...novo, nome: e.target.value })}
+              className={`mt-1 ${inputCls}`}
+            />
+          </label>
+
+          <label className="block">
+            <span className="label">Quantidade</span>
+            <input
+              type="number"
+              value={novo.quantidade}
+              onChange={(e) => setNovo({ ...novo, quantidade: Number(e.target.value) })}
+              className={`mt-1 ${inputCls}`}
+            />
+          </label>
+
+          <label className="block">
+            <span className="label">Preço inicial (R$)</span>
+            <input
+              type="number"
+              value={novo.preco_inicial}
+              onChange={(e) => setNovo({ ...novo, preco_inicial: Number(e.target.value) })}
+              className={`mt-1 ${inputCls}`}
+            />
+          </label>
+
+          {rf && (
+            <>
+              <label className="block">
+                <span className="label">Indexador</span>
+                <select
+                  value={novo.indexador}
+                  onChange={(e) => setNovo({ ...novo, indexador: e.target.value as Indexador })}
+                  className={`mt-1 ${inputCls}`}
+                >
+                  {INDEXADORES.map((i) => (
+                    <option key={i} value={i}>
+                      {i}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block">
+                <span className="label">
+                  Taxa{' '}
+                  <span className="normal-case text-slate-500">
+                    (CDI: % do índice; IPCA/pré: a.a.)
+                  </span>
+                </span>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={novo.taxa_contratada}
+                  onChange={(e) => setNovo({ ...novo, taxa_contratada: Number(e.target.value) })}
+                  className={`mt-1 ${inputCls}`}
+                />
+              </label>
+              <label className="block">
+                <span className="label">Duration (anos)</span>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={novo.duration_anos}
+                  onChange={(e) => setNovo({ ...novo, duration_anos: Number(e.target.value) })}
+                  className={`mt-1 ${inputCls}`}
+                />
+              </label>
+            </>
+          )}
+        </div>
+
+        {erro && <p className="mt-2 text-sm text-rose-400">{erro}</p>}
+
+        <button
+          onClick={adicionar}
+          className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-base-900 hover:bg-accent-soft"
+        >
+          Adicionar à carteira
+        </button>
+      </div>
+    </div>
+  )
+}

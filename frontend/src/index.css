@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-base-900 text-slate-200 antialiased;
+}
+
+/* Card padrão do dashboard. */
+@layer components {
+  .card {
+    @apply rounded-xl border border-base-600/60 bg-base-800/70 p-4 shadow-lg;
+  }
+  .label {
+    @apply text-xs font-medium uppercase tracking-wide text-slate-400;
+  }
+}
