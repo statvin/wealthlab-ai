@@ -6,8 +6,9 @@ import { useState } from 'react'
 import type { AssetClass, HoldingDTO, Indexador } from '../api/types'
 import { fmtBRL, fmtPct } from '../lib/format'
 import { CLASSE_LABEL, CLASSES, ehRendaFixa, valorHolding, valorTotal } from '../lib/portfolio'
-import { buscarTicker, TICKERS_SUGERIDOS } from '../lib/tickers'
+import { buscarTicker } from '../lib/tickers'
 import { NumberField } from './NumberField'
+import { TickerAutocomplete } from './TickerAutocomplete'
 
 const INDEXADORES: Indexador[] = ['CDI', 'SELIC', 'IPCA', 'PREFIXADO']
 
@@ -146,28 +147,22 @@ export function PortfolioEditor({
             </select>
           </label>
 
-          <label className="block">
+          <div className="block">
             <span className="label">Ticker</span>
-            <input
-              list="tickers-sugestoes"
+            <TickerAutocomplete
               value={novo.ticker}
               placeholder={rf ? 'ex.: TD-IPCA-2035' : 'ex.: PETR4.SA'}
-              onChange={(e) => {
-                const ticker = e.target.value
+              onChangeText={(ticker) => {
                 const m = buscarTicker(ticker)
-                // Ao reconhecer o ticker, preenche nome e classe automaticamente.
+                // Se o texto digitado já casar um ticker conhecido, preenche nome/classe.
                 setNovo((n) => ({ ...n, ticker, ...(m ? { nome: m.nome, classe: m.classe } : {}) }))
               }}
+              onSelect={(t) =>
+                setNovo((n) => ({ ...n, ticker: t.ticker, nome: t.nome, classe: t.classe }))
+              }
               className={`mt-1 ${inputCls}`}
             />
-            <datalist id="tickers-sugestoes">
-              {TICKERS_SUGERIDOS.map((t) => (
-                <option key={t.ticker} value={t.ticker}>
-                  {t.nome}
-                </option>
-              ))}
-            </datalist>
-          </label>
+          </div>
 
           <label className="block">
             <span className="label">Nome (opcional)</span>

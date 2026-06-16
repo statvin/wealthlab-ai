@@ -143,10 +143,10 @@ function Dashboard({
           tooltip="Valor inicial da carteira (soma das posições)."
         />
         <KpiCard
-          titulo="Mediana (P50)"
+          titulo="Central (P50)"
           valor={fmtCompactBRL(resumo.nominal.p50)}
           destaque
-          tooltip="Patrimônio nominal mediano ao fim do horizonte."
+          tooltip="Cenário do meio (mediana): metade das simulações termina acima, metade abaixo. Não é a média — como a distribuição é assimétrica, a média costuma ser maior."
         />
         <KpiCard
           titulo="Otimista (P90)"
