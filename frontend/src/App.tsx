@@ -4,10 +4,13 @@ import { api } from './api/client'
 import type { HoldingDTO, Methodology } from './api/types'
 import { CorrelationHeatmap } from './components/CorrelationHeatmap'
 import { FinalHistogram } from './components/FinalHistogram'
+import { InsightsPanel } from './components/InsightsPanel'
 import { KpiCard } from './components/KpiCard'
 import { MethodologyTab } from './components/MethodologyTab'
 import { MonteCarloFunnel } from './components/MonteCarloFunnel'
 import { PortfolioEditor } from './components/PortfolioEditor'
+import { RebalancePanel } from './components/RebalancePanel'
+import { RetirementPanel } from './components/RetirementPanel'
 import { RiskPanel } from './components/RiskPanel'
 import { Sidebar } from './components/Sidebar'
 import { StressPanel } from './components/StressPanel'
@@ -16,7 +19,7 @@ import { CARTEIRA_EXEMPLO } from './lib/defaultPortfolio'
 import { fmtCompactBRL, fmtPct } from './lib/format'
 import { pesosPorAtivo } from './lib/portfolio'
 
-type Aba = 'dashboard' | 'carteira' | 'metodologia'
+type Aba = 'dashboard' | 'carteira' | 'aposentadoria' | 'metodologia'
 
 export default function App() {
   const [holdings, setHoldings] = useState<HoldingDTO[]>(CARTEIRA_EXEMPLO)
@@ -52,6 +55,9 @@ export default function App() {
             <TabBtn ativo={aba === 'carteira'} onClick={() => setAba('carteira')}>
               Carteira
             </TabBtn>
+            <TabBtn ativo={aba === 'aposentadoria'} onClick={() => setAba('aposentadoria')}>
+              Aposentadoria
+            </TabBtn>
             <TabBtn ativo={aba === 'metodologia'} onClick={() => setAba('metodologia')}>
               Metodologia
             </TabBtn>
@@ -82,6 +88,8 @@ export default function App() {
               </button>
             </>
           )}
+
+          {aba === 'aposentadoria' && <RetirementPanel simId={data?.simId ?? null} />}
 
           {aba === 'metodologia' &&
             (metodologia ? (
@@ -182,6 +190,8 @@ function Dashboard({
 
       {loading && <p className="text-xs text-slate-500">Atualizando…</p>}
 
+      <InsightsPanel insights={data.insights} />
+
       <div className="card">
         <h3 className="mb-2 text-sm font-semibold text-slate-300">
           Projeção de Monte Carlo (nominal)
@@ -206,6 +216,7 @@ function Dashboard({
 
       <RiskPanel risk={risk} />
       <StressPanel simId={data.simId} />
+      <RebalancePanel simId={data.simId} holdings={holdings} />
     </>
   )
 }

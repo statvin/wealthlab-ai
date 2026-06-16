@@ -178,6 +178,7 @@ def simular_portfolio(
     cashflow: CashFlowPlan | None = None,
     target: TargetAllocation | None = None,
     precos_iniciais: dict[str, float] | None = None,
+    net_fluxo: np.ndarray | None = None,
 ) -> SimulationResult:
     """Roda a simulação Monte Carlo para uma carteira.
 
@@ -186,6 +187,9 @@ def simular_portfolio(
     - `premissas_juros`: cenário base de Selic/IPCA para a renda fixa.
     - `precos_iniciais`: preço unitário por ticker (default 1.0 → quantidade já é
       o valor em R$; conveniente para RF e para testes).
+    - `net_fluxo`: opcional, vetor (n_passos,) de fluxo líquido (aporte − saque)
+      por passo. Quando informado, substitui o derivado de `cashflow` — usado
+      pela aposentadoria para modelar fases distintas (acumulação → decumulação).
     """
     t0 = time.perf_counter()
 
@@ -256,7 +260,10 @@ def simular_portfolio(
         alvo_por_ativo = None
         dist_default = np.full(n_ativos, 1.0 / n_ativos)
 
-    net_fluxo = _montar_fluxos(cashflow, n_passos, config.inflacao_aa)
+    if net_fluxo is None:
+        net_fluxo = _montar_fluxos(cashflow, n_passos, config.inflacao_aa)
+    elif len(net_fluxo) != n_passos:
+        raise ValueError(f"net_fluxo deve ter comprimento n_passos={n_passos}.")
 
     trajetoria, valores_finais, ruina = _evoluir_patrimonio(
         valor_inicial=valor_inicial,

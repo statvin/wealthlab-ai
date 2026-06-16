@@ -2,14 +2,19 @@
 // JSON e o tratamento de erro; os métodos abaixo só dizem o tipo de retorno.
 
 import type {
+  InsightsOut,
   Methodology,
   PortfolioCreate,
   PortfolioOut,
+  RebalanceOut,
   ResultsOut,
+  RetirementOut,
+  RetirementRequest,
   RiskAnalysisOut,
   SimulationRunRequest,
   SimulationRunResponse,
   StressOut,
+  TargetAllocationDTO,
 } from './types'
 
 const BASE = import.meta.env.VITE_API_BASE ?? '/api'
@@ -63,4 +68,18 @@ export const api = {
     ),
 
   methodology: () => req<Methodology>('/methodology'),
+
+  insights: (id: number) => req<InsightsOut>(`/simulation/${id}/insights`),
+
+  rebalance: (id: number, target: TargetAllocationDTO) =>
+    req<RebalanceOut>(`/simulation/${id}/rebalance`, {
+      method: 'POST',
+      body: JSON.stringify(target),
+    }),
+
+  retirement: (id: number, body: RetirementRequest) =>
+    req<RetirementOut>(`/simulation/${id}/retirement`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 }

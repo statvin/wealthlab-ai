@@ -9,6 +9,7 @@ import { useCallback, useRef, useState } from 'react'
 import { api } from '../api/client'
 import type {
   HoldingDTO,
+  Insight,
   RebalanceMode,
   Resumo,
   ResultsOut,
@@ -48,6 +49,7 @@ export interface SimData {
   resumo: Resumo
   results: ResultsOut
   risk: RiskAnalysisOut
+  insights: Insight[]
 }
 
 export function useSimulation() {
@@ -92,11 +94,18 @@ export function useSimulation() {
       }
 
       const runRes = await api.rodarSimulacao(req)
-      const [results, risk] = await Promise.all([
+      const [results, risk, insightsRes] = await Promise.all([
         api.resultados(runRes.id),
         api.riskAnalysis(runRes.id),
+        api.insights(runRes.id),
       ])
-      setData({ simId: runRes.id, resumo: runRes.resumo, results, risk })
+      setData({
+        simId: runRes.id,
+        resumo: runRes.resumo,
+        results,
+        risk,
+        insights: insightsRes.insights,
+      })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {

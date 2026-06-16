@@ -18,7 +18,7 @@ Python puro, testável sem rede e sem UI.
 | **3** | Stress por parâmetros chocados | ✅ concluída |
 | **4** | API FastAPI + SQLite + migrations | ✅ concluída |
 | **5** | Dashboard React/TS | ✅ concluída |
-| 6 | Insights + rebalanceamento (+ aposentadoria) | ⏳ |
+| **6** | Insights + rebalanceamento + aposentadoria | ✅ concluída |
 
 ## Instalação
 
@@ -62,6 +62,9 @@ Endpoints:
 | GET | `/simulation/{id}/results` | resumo + funil (amostra + bandas P5..P95) |
 | GET | `/simulation/{id}/risk-analysis` | VaR/CVaR, ruína, meta, drawdown, contribuição |
 | GET | `/simulation/{id}/stress-test` | Base vs. Stress (query `presets=2008,COVID-2020`) |
+| GET | `/simulation/{id}/insights` | insights por regras (cada um rastreável a uma métrica) |
+| POST | `/simulation/{id}/rebalance` | compras/vendas vs. alvo desejado (body: alvo por classe) |
+| POST | `/simulation/{id}/retirement` | "posso me aposentar?": prob. de sucesso e saque sustentável |
 | GET | `/methodology` | premissas da aba Metodologia |
 
 A simulação grava `seed` + entradas, então a mesma requisição é **reproduzível**.

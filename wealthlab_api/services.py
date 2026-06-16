@@ -28,7 +28,10 @@ from wealthlab_core.domain import (
 from wealthlab_core.domain.enums import CLASSES_RENDA_VARIAVEL
 from wealthlab_core.engine.estimation import EstimatedParams, estimar_parametros
 from wealthlab_core.engine.fixed_income import PremissasJuros
+from wealthlab_core.engine.insights import gerar_insights
 from wealthlab_core.engine.metrics import analisar_risco
+from wealthlab_core.engine.rebalance import recomendar_rebalanceamento
+from wealthlab_core.engine.retirement import analisar_aposentadoria
 from wealthlab_core.engine.simulator import SimulationResult, simular_portfolio
 from wealthlab_core.engine.stress import PRESETS, comparar_base_vs_stress
 from wealthlab_core.marketdata import MarketDataProvider
@@ -260,6 +263,21 @@ def executar_simulacao(
         target=target, precos_iniciais=precos, goal=goal, result=result,
     )
     resultado = montar_resultado(result, risk, goal, params)
+    # Insights por regras, calculados uma vez e guardados (servidos em /insights).
+    valor_inicial = float(result.trajetorias_nominais[0, 0])
+    resultado["insights"] = [
+        {
+            "categoria": i.categoria,
+            "severidade": i.severidade,
+            "texto": i.texto,
+            "metrica": i.metrica,
+            "valor": i.valor,
+        }
+        for i in gerar_insights(
+            dominio_pf, risk, precos_iniciais=precos, cashflow=cashflow,
+            valor_inicial=valor_inicial,
+        )
+    ]
 
     config_orm = repository.create_config(db, request.config)
     entradas = {
@@ -303,3 +321,65 @@ def rodar_stress(
             "resumo": {k: [v[0], v[1]] for k, v in comp.resumo.items()},
         })
     return saida
+
+
+def recomendar_rebalance(sim: models.Simulation, target_por_classe: dict[str, float]) -> dict:
+    """Recomendação de compras/vendas para levar a carteira da simulação a um
+    alvo desejado por classe."""
+    dominio_pf, precos = portfolio_orm_para_dominio(sim.portfolio)
+    target = _target({"por_classe": target_por_classe})
+    rec = recomendar_rebalanceamento(dominio_pf, target, precos_iniciais=precos)
+    return {
+        "valor_total": rec.valor_total,
+        "turnover": rec.turnover,
+        "por_classe": [
+            {
+                "classe": d.classe.value,
+                "valor_atual": d.valor_atual,
+                "peso_atual": d.peso_atual,
+                "peso_alvo": d.peso_alvo,
+                "valor_alvo": d.valor_alvo,
+                "delta": d.delta,
+            }
+            for d in rec.por_classe
+        ],
+        "trades": [
+            {"ticker": t.ticker, "classe": t.classe.value, "acao": t.acao, "valor": t.valor}
+            for t in rec.trades
+        ],
+    }
+
+
+def analisar_retirement(
+    sim: models.Simulation,
+    request: schemas.RetirementRequest,
+    provider: MarketDataProvider,
+    settings: Settings,
+) -> dict:
+    """Análise de aposentadoria sobre a carteira da simulação."""
+    dominio_pf, precos = portfolio_orm_para_dominio(sim.portfolio)
+    params = estimar_params_rv(provider, dominio_pf, settings)
+    config = _config_orm_para_dominio(sim.config)
+    juros = _juros(sim.entradas["premissas_juros"])
+    target = _target(sim.entradas.get("target"))
+
+    r = analisar_aposentadoria(
+        dominio_pf, config, juros,
+        idade_atual=request.idade_atual,
+        idade_aposentadoria=request.idade_aposentadoria,
+        idade_final=request.idade_final,
+        aporte_mensal=request.aporte_mensal,
+        saque_mensal_desejado=request.saque_mensal_desejado,
+        params_rv=params, target=target, precos_iniciais=precos,
+        alvo_sucesso=request.alvo_sucesso,
+    )
+    return {
+        "prob_sucesso": r.prob_sucesso,
+        "saque_desejado": r.saque_desejado,
+        "saque_sustentavel": r.saque_sustentavel,
+        "alvo_sucesso": r.alvo_sucesso,
+        "patrimonio_aposentadoria": r.patrimonio_aposentadoria,
+        "patrimonio_final": r.patrimonio_final,
+        "meses_acumulacao": r.meses_acumulacao,
+        "meses_total": r.meses_total,
+    }

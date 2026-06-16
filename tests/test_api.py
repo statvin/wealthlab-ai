@@ -208,3 +208,46 @@ def test_stress_test(client):
 def test_run_carteira_inexistente_404(client):
     r = client.post("/simulation/run", json=_run_payload(999))
     assert r.status_code == 404
+
+
+# ----------------------------- Fase 6 -------------------------------------
+def test_insights(client):
+    pid = _criar_carteira(client)
+    sim_id = client.post("/simulation/run", json=_run_payload(pid)).json()["id"]
+    r = client.get(f"/simulation/{sim_id}/insights")
+    assert r.status_code == 200
+    insights = r.json()["insights"]
+    assert isinstance(insights, list)
+    for i in insights:  # toda afirmação rastreável a uma métrica
+        assert i["metrica"] and "valor" in i and i["categoria"]
+
+
+def test_rebalance(client):
+    pid = _criar_carteira(client)
+    sim_id = client.post("/simulation/run", json=_run_payload(pid)).json()["id"]
+    alvo = {"por_classe": {"EQUITY_BR": 0.5, "EQUITY_INTL": 0.3, "FIXED_INCOME_POS": 0.2}}
+    r = client.post(f"/simulation/{sim_id}/rebalance", json=alvo)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["valor_total"] > 0
+    assert {t["ticker"] for t in body["trades"]} == {"AAA", "BBB", "CDB"}
+    assert 0.0 <= body["turnover"] <= 1.0
+
+
+def test_retirement(client):
+    pid = _criar_carteira(client)
+    sim_id = client.post("/simulation/run", json=_run_payload(pid)).json()["id"]
+    req = {
+        "idade_atual": 40,
+        "idade_aposentadoria": 50,
+        "idade_final": 70,
+        "aporte_mensal": 1000,
+        "saque_mensal_desejado": 2000,
+        "alvo_sucesso": 0.9,
+    }
+    r = client.post(f"/simulation/{sim_id}/retirement", json=req)
+    assert r.status_code == 200
+    body = r.json()
+    assert 0.0 <= body["prob_sucesso"] <= 1.0
+    assert body["saque_sustentavel"] >= 0.0
+    assert "p50" in body["patrimonio_aposentadoria"]

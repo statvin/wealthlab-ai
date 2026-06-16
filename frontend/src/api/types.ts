@@ -181,3 +181,62 @@ export interface Methodology {
   metricas: Record<string, string>
   stress: string
 }
+
+// ----------------------------- Fase 6 -------------------------------------
+export interface Insight {
+  categoria: string
+  severidade: 'positivo' | 'neutro' | 'atencao' | 'alerta'
+  texto: string
+  metrica: string
+  valor: number
+}
+
+export interface InsightsOut {
+  id: number
+  insights: Insight[]
+}
+
+export interface DeltaClasse {
+  classe: AssetClass
+  valor_atual: number
+  peso_atual: number
+  peso_alvo: number
+  valor_alvo: number
+  delta: number
+}
+
+export interface Trade {
+  ticker: string
+  classe: AssetClass
+  acao: 'comprar' | 'vender' | 'manter'
+  valor: number
+}
+
+export interface RebalanceOut {
+  id: number
+  valor_total: number
+  turnover: number
+  por_classe: DeltaClasse[]
+  trades: Trade[]
+}
+
+export interface RetirementRequest {
+  idade_atual: number
+  idade_aposentadoria: number
+  idade_final: number
+  aporte_mensal: number
+  saque_mensal_desejado: number
+  alvo_sucesso: number
+}
+
+export interface RetirementOut {
+  id: number
+  prob_sucesso: number
+  saque_desejado: number
+  saque_sustentavel: number
+  alvo_sucesso: number
+  patrimonio_aposentadoria: Record<string, number>
+  patrimonio_final: Record<string, number>
+  meses_acumulacao: number
+  meses_total: number
+}

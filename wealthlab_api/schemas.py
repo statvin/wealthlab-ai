@@ -125,3 +125,38 @@ class RiskAnalysisOut(BaseModel):
 class StressOut(BaseModel):
     id: int
     comparacoes: list[dict]   # uma por preset: nome, descricao, resumo {metric: [base, stress]}
+
+
+# --------------------------- Fase 6: insights / rebalance / aposentadoria -----
+class InsightsOut(BaseModel):
+    id: int
+    insights: list[dict]   # categoria, severidade, texto, metrica, valor
+
+
+class RebalanceOut(BaseModel):
+    id: int
+    valor_total: float
+    turnover: float
+    por_classe: list[dict]
+    trades: list[dict]
+
+
+class RetirementRequest(BaseModel):
+    idade_atual: float = Field(gt=0)
+    idade_aposentadoria: float = Field(gt=0)
+    idade_final: float = Field(gt=0)
+    aporte_mensal: float = Field(default=0.0, ge=0)
+    saque_mensal_desejado: float = Field(default=0.0, ge=0)
+    alvo_sucesso: float = Field(default=0.90, gt=0, lt=1)
+
+
+class RetirementOut(BaseModel):
+    id: int
+    prob_sucesso: float
+    saque_desejado: float
+    saque_sustentavel: float
+    alvo_sucesso: float
+    patrimonio_aposentadoria: dict
+    patrimonio_final: dict
+    meses_acumulacao: int
+    meses_total: int

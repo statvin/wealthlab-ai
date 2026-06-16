@@ -80,3 +80,36 @@ def stress_test(
             )
     comparacoes = services.rodar_stress(db, sim, provider, settings, nomes)
     return schemas.StressOut(id=sim.id, comparacoes=comparacoes)
+
+
+@router.get("/{sim_id}/insights", response_model=schemas.InsightsOut)
+def insights(sim_id: int, db: Session = Depends(get_db)):
+    sim = _get_sim_ou_404(db, sim_id)
+    return schemas.InsightsOut(id=sim.id, insights=sim.resultado.get("insights", []))
+
+
+@router.post("/{sim_id}/rebalance", response_model=schemas.RebalanceOut)
+def rebalance(
+    sim_id: int,
+    target: schemas.TargetAllocationDTO,
+    db: Session = Depends(get_db),
+):
+    # POST (não GET) porque exige o alvo desejado como entrada. Distinto do
+    # rebalanceamento DENTRO da simulação.
+    sim = _get_sim_ou_404(db, sim_id)
+    por_classe = target.model_dump(mode="json")["por_classe"]
+    rec = services.recomendar_rebalance(sim, por_classe)
+    return schemas.RebalanceOut(id=sim.id, **rec)
+
+
+@router.post("/{sim_id}/retirement", response_model=schemas.RetirementOut)
+def retirement(
+    sim_id: int,
+    request: schemas.RetirementRequest,
+    db: Session = Depends(get_db),
+    provider=Depends(get_market_provider),
+    settings: Settings = Depends(get_settings),
+):
+    sim = _get_sim_ou_404(db, sim_id)
+    r = services.analisar_retirement(sim, request, provider, settings)
+    return schemas.RetirementOut(id=sim.id, **r)

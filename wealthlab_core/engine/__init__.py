@@ -42,6 +42,14 @@ from wealthlab_core.engine.stress import (
     precos_com_haircut,
     rodar_cenario_stress,
 )
+from wealthlab_core.engine.insights import Insight, gerar_insights
+from wealthlab_core.engine.rebalance import (
+    DeltaClasse,
+    RebalanceRecommendation,
+    Trade,
+    recomendar_rebalanceamento,
+)
+from wealthlab_core.engine.retirement import RetirementResult, analisar_aposentadoria
 
 __all__ = [
     "EstimatedParams",
@@ -77,4 +85,12 @@ __all__ = [
     "precos_com_haircut",
     "rodar_cenario_stress",
     "comparar_base_vs_stress",
+    "Insight",
+    "gerar_insights",
+    "DeltaClasse",
+    "Trade",
+    "RebalanceRecommendation",
+    "recomendar_rebalanceamento",
+    "RetirementResult",
+    "analisar_aposentadoria",
 ]
