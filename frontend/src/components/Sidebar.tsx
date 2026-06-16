@@ -1,9 +1,11 @@
 // Sidebar de parâmetros da SIMULAÇÃO (não da composição da carteira).
 
-import type { ChangeEvent } from 'react'
-
 import type { RebalanceMode } from '../api/types'
 import type { SimInputs } from '../hooks/useSimulation'
+import { NumberField } from './NumberField'
+
+const inputCls =
+  'w-full rounded-lg border border-base-600 bg-base-900 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none'
 
 interface Props {
   inputs: SimInputs
@@ -26,13 +28,7 @@ function Campo({
   return (
     <label className="block">
       <span className="label">{label}</span>
-      <input
-        type="number"
-        step={step}
-        value={value}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(Number(e.target.value))}
-        className="mt-1 w-full rounded-lg border border-base-600 bg-base-900 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none"
-      />
+      <NumberField value={value} onChange={onChange} step={step} className={`mt-1 ${inputCls}`} />
     </label>
   )
 }

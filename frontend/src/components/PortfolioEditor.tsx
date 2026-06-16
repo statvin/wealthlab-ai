@@ -6,6 +6,8 @@ import { useState } from 'react'
 import type { AssetClass, HoldingDTO, Indexador } from '../api/types'
 import { fmtBRL, fmtPct } from '../lib/format'
 import { CLASSE_LABEL, CLASSES, ehRendaFixa, valorHolding, valorTotal } from '../lib/portfolio'
+import { buscarTicker, TICKERS_SUGERIDOS } from '../lib/tickers'
+import { NumberField } from './NumberField'
 
 const INDEXADORES: Indexador[] = ['CDI', 'SELIC', 'IPCA', 'PREFIXADO']
 
@@ -147,11 +149,24 @@ export function PortfolioEditor({
           <label className="block">
             <span className="label">Ticker</span>
             <input
+              list="tickers-sugestoes"
               value={novo.ticker}
-              placeholder={rf ? 'ex.: TD-IPCA-2035' : 'ex.: WEGE3.SA'}
-              onChange={(e) => setNovo({ ...novo, ticker: e.target.value })}
+              placeholder={rf ? 'ex.: TD-IPCA-2035' : 'ex.: PETR4.SA'}
+              onChange={(e) => {
+                const ticker = e.target.value
+                const m = buscarTicker(ticker)
+                // Ao reconhecer o ticker, preenche nome e classe automaticamente.
+                setNovo((n) => ({ ...n, ticker, ...(m ? { nome: m.nome, classe: m.classe } : {}) }))
+              }}
               className={`mt-1 ${inputCls}`}
             />
+            <datalist id="tickers-sugestoes">
+              {TICKERS_SUGERIDOS.map((t) => (
+                <option key={t.ticker} value={t.ticker}>
+                  {t.nome}
+                </option>
+              ))}
+            </datalist>
           </label>
 
           <label className="block">
@@ -165,20 +180,18 @@ export function PortfolioEditor({
 
           <label className="block">
             <span className="label">Quantidade</span>
-            <input
-              type="number"
+            <NumberField
               value={novo.quantidade}
-              onChange={(e) => setNovo({ ...novo, quantidade: Number(e.target.value) })}
+              onChange={(v) => setNovo({ ...novo, quantidade: v })}
               className={`mt-1 ${inputCls}`}
             />
           </label>
 
           <label className="block">
             <span className="label">Preço inicial (R$)</span>
-            <input
-              type="number"
+            <NumberField
               value={novo.preco_inicial}
-              onChange={(e) => setNovo({ ...novo, preco_inicial: Number(e.target.value) })}
+              onChange={(v) => setNovo({ ...novo, preco_inicial: v })}
               className={`mt-1 ${inputCls}`}
             />
           </label>
@@ -206,21 +219,19 @@ export function PortfolioEditor({
                     (CDI: % do índice; IPCA/pré: a.a.)
                   </span>
                 </span>
-                <input
-                  type="number"
-                  step="0.01"
+                <NumberField
                   value={novo.taxa_contratada}
-                  onChange={(e) => setNovo({ ...novo, taxa_contratada: Number(e.target.value) })}
+                  onChange={(v) => setNovo({ ...novo, taxa_contratada: v })}
+                  step="0.01"
                   className={`mt-1 ${inputCls}`}
                 />
               </label>
               <label className="block">
                 <span className="label">Duration (anos)</span>
-                <input
-                  type="number"
-                  step="0.5"
+                <NumberField
                   value={novo.duration_anos}
-                  onChange={(e) => setNovo({ ...novo, duration_anos: Number(e.target.value) })}
+                  onChange={(v) => setNovo({ ...novo, duration_anos: v })}
+                  step="0.5"
                   className={`mt-1 ${inputCls}`}
                 />
               </label>

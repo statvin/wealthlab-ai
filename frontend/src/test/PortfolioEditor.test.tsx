@@ -9,7 +9,7 @@ describe('PortfolioEditor', () => {
     const onChange = vi.fn()
     render(<PortfolioEditor holdings={[]} onChange={onChange} />)
 
-    await userEvent.type(screen.getByPlaceholderText(/WEGE3/i), 'WEGE3.SA')
+    await userEvent.type(screen.getByPlaceholderText(/PETR4/i), 'WEGE3.SA')
     const nums = screen.getAllByRole('spinbutton') // [quantidade, preço]
     await userEvent.clear(nums[0])
     await userEvent.type(nums[0], '10')
