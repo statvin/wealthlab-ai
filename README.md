@@ -163,7 +163,15 @@ wealthlab_core/
 
 ## Testes
 
-`pytest -q` — 38 testes cobrindo: validações de domínio, recuperação de μ/σ/corr de
-dados sintéticos, propriedades da t-Student (covariância-alvo, gordura de cauda),
-carrego de renda fixa, fluxos/saques/ruína, rebalanceamento, reprodutibilidade por
-seed e o critério de performance.
+`pytest -q` — 86 testes do motor + API cobrindo: validações de domínio, recuperação
+de μ/σ/corr de dados sintéticos, propriedades da t-Student (covariância-alvo, gordura
+de cauda), carrego de renda fixa, fluxos/saques/ruína, rebalanceamento, métricas de
+risco, stress, integração da API e reprodutibilidade por seed. No front, `npm test`
+roda 9 testes de componentes (Vitest + Testing Library).
+
+## Licença
+
+**© 2026 Vinícius Ramos. Todos os direitos reservados.** Este repositório é público
+apenas para fins de portfólio e avaliação. Ver o código **não** concede direito de
+uso — nenhuma permissão de usar, copiar, modificar ou redistribuir é dada sem
+autorização escrita. Ver [LICENSE](LICENSE).
