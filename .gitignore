@@ -32,6 +32,11 @@ htmlcov/
 # Ferramentas locais (launch configs com caminhos absolutos da máquina)
 .claude/
 
+# Documentos locais — não versionar (não devem ir para o GitHub)
+redesign_brief.md
+REDESIGN_BRIEF.md
+docs/REDESIGN_BRIEF.md
+
 # IDE / SO
 .vscode/
 .idea/
