@@ -6,8 +6,8 @@ import { useState } from 'react'
 
 import { useRetirement } from '../hooks/useRetirement'
 import { fmtCompactBRL, fmtPct } from '../lib/format'
-import { KpiCard } from './KpiCard'
 import { NumberField } from './NumberField'
+import { Stat } from './ui/Stat'
 
 const inputCls =
   'w-full rounded-lg border border-base-600 bg-base-900 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none'
@@ -80,26 +80,26 @@ export function RetirementPanel({ simId }: { simId: number | null }) {
       </div>
 
       {data && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <KpiCard
-            titulo="Prob. de sucesso"
-            valor={fmtPct(data.prob_sucesso)}
-            destaque
+        <div className="card grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <Stat
+            label="Prob. de sucesso"
+            value={fmtPct(data.prob_sucesso)}
+            tone="accent"
             tooltip="Fração dos cenários em que o dinheiro dura até a idade final com o saque desejado."
           />
-          <KpiCard
-            titulo="Saque sustentável"
-            valor={fmtCompactBRL(data.saque_sustentavel)}
+          <Stat
+            label="Saque sustentável"
+            value={fmtCompactBRL(data.saque_sustentavel)}
             tooltip={`Maior saque mensal com sucesso ≥ ${fmtPct(data.alvo_sucesso, 0)}.`}
           />
-          <KpiCard
-            titulo="Patrimônio ao aposentar"
-            valor={fmtCompactBRL(data.patrimonio_aposentadoria.p50)}
+          <Stat
+            label="Patrimônio ao aposentar"
+            value={fmtCompactBRL(data.patrimonio_aposentadoria.p50)}
             tooltip="Mediana do patrimônio no momento da aposentadoria."
           />
-          <KpiCard
-            titulo="Patrimônio final (P50)"
-            valor={fmtCompactBRL(data.patrimonio_final.p50)}
+          <Stat
+            label="Patrimônio final (P50)"
+            value={fmtCompactBRL(data.patrimonio_final.p50)}
             tooltip="Mediana do patrimônio na idade final, após os saques."
           />
         </div>

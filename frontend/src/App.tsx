@@ -5,7 +5,6 @@ import type { HoldingDTO, Methodology } from './api/types'
 import { CorrelationHeatmap } from './components/CorrelationHeatmap'
 import { FinalHistogram } from './components/FinalHistogram'
 import { InsightsPanel } from './components/InsightsPanel'
-import { KpiCard } from './components/KpiCard'
 import { MethodologyTab } from './components/MethodologyTab'
 import { MonteCarloFunnel } from './components/MonteCarloFunnel'
 import { PortfolioEditor } from './components/PortfolioEditor'
@@ -14,12 +13,21 @@ import { RetirementPanel } from './components/RetirementPanel'
 import { RiskPanel } from './components/RiskPanel'
 import { Sidebar } from './components/Sidebar'
 import { StressPanel } from './components/StressPanel'
+import { Badge, type BadgeTone } from './components/ui/Badge'
+import { Stat } from './components/ui/Stat'
 import { INPUTS_PADRAO, useSimulation, type SimData, type SimInputs } from './hooks/useSimulation'
 import { CARTEIRA_EXEMPLO } from './lib/defaultPortfolio'
 import { fmtCompactBRL, fmtPct } from './lib/format'
+import { montarTese, type NivelRuina } from './lib/narrative'
 import { pesosPorAtivo } from './lib/portfolio'
 
 type Aba = 'dashboard' | 'carteira' | 'aposentadoria' | 'metodologia'
+
+const RUINA_TONE: Record<NivelRuina, BadgeTone> = {
+  baixo: 'success',
+  moderado: 'warning',
+  alto: 'danger',
+}
 
 export default function App() {
   const [holdings, setHoldings] = useState<HoldingDTO[]>(CARTEIRA_EXEMPLO)
@@ -42,11 +50,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-base-600/60 bg-base-800/50 px-4 py-3">
+      <header className="border-b border-ink-700/60 bg-ink-850/50 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-baseline gap-1">
-            <span className="text-lg font-bold text-accent">WealthLab</span>
-            <span className="text-lg font-light text-slate-300">AI</span>
+            <span className="text-lg font-semibold text-accent">WealthLab</span>
+            <span className="text-lg font-light text-slate-400">AI</span>
           </div>
           <nav className="flex gap-1 text-sm">
             <TabBtn ativo={aba === 'dashboard'} onClick={() => setAba('dashboard')}>
@@ -65,24 +73,19 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-7xl flex-col gap-4 p-4 lg:flex-row">
+      <main className="mx-auto flex max-w-7xl flex-col gap-6 p-4 sm:p-6 lg:flex-row">
         {aba === 'dashboard' && (
-          <Sidebar
-            inputs={inputs}
-            onChange={setInputs}
-            onRun={simular}
-            loading={loading}
-          />
+          <Sidebar inputs={inputs} onChange={setInputs} onRun={simular} loading={loading} />
         )}
 
-        <section className="min-w-0 flex-1 space-y-4">
+        <section className="min-w-0 flex-1 space-y-6">
           {aba === 'carteira' && (
             <>
               <PortfolioEditor holdings={holdings} onChange={setHoldings} />
               <button
                 onClick={simular}
                 disabled={loading || holdings.length === 0}
-                className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-base-900 hover:bg-accent-soft disabled:opacity-50"
+                className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-ink-950 transition-colors hover:bg-accent-soft disabled:opacity-50"
               >
                 {loading ? 'Simulando…' : 'Salvar carteira e simular'}
               </button>
@@ -99,7 +102,13 @@ export default function App() {
             ))}
 
           {aba === 'dashboard' && (
-            <Dashboard loading={loading} error={error} data={data} holdings={holdings} />
+            <Dashboard
+              loading={loading}
+              error={error}
+              data={data}
+              holdings={holdings}
+              inputs={inputs}
+            />
           )}
         </section>
       </main>
@@ -112,11 +121,13 @@ function Dashboard({
   error,
   data,
   holdings,
+  inputs,
 }: {
   loading: boolean
   error: string | null
   data: SimData | null
   holdings: HoldingDTO[]
+  inputs: SimInputs
 }) {
   if (error) {
     return (
@@ -131,11 +142,38 @@ function Dashboard({
   const { resumo, results, risk } = data
   const vc95 = risk.var_cvar.find((v) => v.nivel === 0.95)
   const pesos = pesosPorAtivo(holdings)
+  const tese = montarTese(resumo, results.funil, inputs.horizonteAnos, inputs.valorMeta)
 
   return (
     <>
-      <div className="card flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-        <span className="label">Carteira simulada</span>
+      {/* Hero — número provável + frase-tese (elemento-assinatura). */}
+      <div className="card-hero">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <Stat
+            size="hero"
+            tone="accent"
+            label={`Patrimônio provável em ${Math.round(inputs.horizonteAnos)} anos`}
+            value={fmtCompactBRL(resumo.nominal.p50)}
+            sub={`Hoje: ${fmtCompactBRL(resumo.patrimonio_inicial)}`}
+          />
+          <div className="lg:max-w-md">
+            <p className="text-lg leading-relaxed text-slate-100 sm:text-xl">{tese.frase}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Badge>
+                Faixa {fmtCompactBRL(tese.faixaP10)}–{fmtCompactBRL(tese.faixaP90)}
+              </Badge>
+              {tese.metaAtingivelAnos != null && (
+                <Badge tone="success">Meta atingível em {tese.metaAtingivelAnos} anos</Badge>
+              )}
+              <Badge tone={RUINA_TONE[tese.nivelRuina]}>Risco de ruína {tese.nivelRuina}</Badge>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Carteira simulada — contexto sutil. */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <span className="eyebrow">Carteira simulada</span>
         {pesos.map(({ ticker, peso }) => (
           <span key={ticker} className="text-slate-300">
             {ticker} <span className="text-slate-500">{fmtPct(peso, 0)}</span>
@@ -144,72 +182,50 @@ function Dashboard({
         <span className="text-slate-500">· edite na aba “Carteira”</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <KpiCard
-          titulo="Patrimônio atual"
-          valor={fmtCompactBRL(resumo.patrimonio_inicial)}
-          tooltip="Valor inicial da carteira (soma das posições)."
-        />
-        <KpiCard
-          titulo="Central (P50)"
-          valor={fmtCompactBRL(resumo.nominal.p50)}
-          destaque
-          tooltip="Cenário do meio (mediana): metade das simulações termina acima, metade abaixo. Não é a média — como a distribuição é assimétrica, a média costuma ser maior."
-        />
-        <KpiCard
-          titulo="Otimista (P90)"
-          valor={fmtCompactBRL(resumo.nominal.p90)}
+      <InsightsPanel insights={data.insights} />
+
+      {/* KPIs secundários (menores, abaixo do herói). */}
+      <div className="card grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <Stat
+          size="sm"
+          label="Otimista (P90)"
+          value={fmtCompactBRL(resumo.nominal.p90)}
           tooltip="90% dos cenários terminam abaixo deste valor."
         />
-        <KpiCard
-          titulo="Pessimista (P10)"
-          valor={fmtCompactBRL(resumo.nominal.p10)}
+        <Stat
+          size="sm"
+          label="Pessimista (P10)"
+          value={fmtCompactBRL(resumo.nominal.p10)}
           tooltip="Apenas 10% dos cenários terminam abaixo deste valor."
         />
-        <KpiCard
-          titulo="Prob. de meta"
-          valor={resumo.prob_meta != null ? fmtPct(resumo.prob_meta) : '—'}
-          tooltip="Fração de cenários com patrimônio ≥ meta no prazo definido."
-        />
-        <KpiCard
-          titulo="Prob. de ruína"
-          valor={fmtPct(resumo.prob_ruina)}
-          tooltip="Fração de cenários que tocam zero antes do fim do horizonte."
-        />
-        <KpiCard
-          titulo="VaR 95% (1 ano)"
-          valor={fmtPct(vc95?.var ?? 0)}
+        <Stat
+          size="sm"
+          label="VaR 95% (1 ano)"
+          value={fmtPct(vc95?.var ?? 0)}
           tooltip="Perda máxima esperada em 1 ano com 95% de confiança (risco de mercado)."
         />
-        <KpiCard
-          titulo="CVaR 95% (1 ano)"
-          valor={fmtPct(vc95?.cvar ?? 0)}
-          tooltip="Perda média nos 5% piores cenários de 1 ano (Expected Shortfall)."
+        <Stat
+          size="sm"
+          label="Vol. anual"
+          value={fmtPct(risk.contribuicao.vol_anual_carteira)}
+          tooltip="Volatilidade anualizada da carteira (a renda variável domina)."
         />
       </div>
 
       {loading && <p className="text-xs text-slate-500">Atualizando…</p>}
 
-      <InsightsPanel insights={data.insights} />
-
       <div className="card">
-        <h3 className="mb-2 text-sm font-semibold text-slate-300">
-          Projeção de Monte Carlo (nominal)
-        </h3>
+        <h3 className="eyebrow mb-3">Projeção de Monte Carlo (nominal)</h3>
         <MonteCarloFunnel funil={results.funil} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <div className="card">
-          <h3 className="mb-2 text-sm font-semibold text-slate-300">
-            Correlação (renda variável)
-          </h3>
+          <h3 className="eyebrow mb-3">Correlação (renda variável)</h3>
           <CorrelationHeatmap correlacao={results.correlacao} />
         </div>
         <div className="card">
-          <h3 className="mb-2 text-sm font-semibold text-slate-300">
-            Distribuição dos patrimônios finais
-          </h3>
+          <h3 className="eyebrow mb-3">Distribuição dos patrimônios finais</h3>
           <FinalHistogram histograma={results.histograma} />
         </div>
       </div>
@@ -233,8 +249,8 @@ function TabBtn({
   return (
     <button
       onClick={onClick}
-      className={`rounded-lg px-3 py-1.5 transition ${
-        ativo ? 'bg-accent text-base-900' : 'text-slate-300 hover:bg-base-700'
+      className={`rounded-lg px-3 py-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
+        ativo ? 'bg-accent text-ink-950' : 'text-slate-300 hover:bg-ink-700'
       }`}
     >
       {children}
@@ -244,9 +260,7 @@ function TabBtn({
 
 function Aviso({ texto, tom = 'info' }: { texto: string; tom?: 'info' | 'erro' }) {
   return (
-    <div
-      className={`card text-sm ${tom === 'erro' ? 'text-rose-300' : 'text-slate-400'}`}
-    >
+    <div className={`card text-sm ${tom === 'erro' ? 'text-semantic-danger' : 'text-slate-400'}`}>
       {texto}
     </div>
   )
