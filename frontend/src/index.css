@@ -7,15 +7,39 @@
 }
 
 body {
-  @apply bg-base-900 text-slate-200 antialiased;
+  @apply bg-ink-900 font-sans text-slate-200 antialiased;
+  /* Algarismos tabulares em TODO número: colunas de R$/% alinham dígito a dígito.
+     É o detalhe grau-financeiro que separa produto de protótipo. */
+  font-feature-settings: 'tnum' 1, 'cv11' 1;
 }
 
-/* Card padrão do dashboard. */
 @layer components {
+  /* Hierarquia de superfícies (fundo < card < card elevado). */
+  .surface {
+    @apply rounded-2xl border border-ink-700/60 bg-ink-850/70;
+  }
+  .surface-elevated {
+    @apply rounded-2xl border border-ink-600/70 bg-ink-800 shadow-xl shadow-black/30;
+  }
+
+  /* `.card` continua existindo (migração por fase), agora sobre os tokens novos. */
   .card {
-    @apply rounded-xl border border-base-600/60 bg-base-800/70 p-4 shadow-lg;
+    @apply rounded-2xl border border-ink-700/60 bg-ink-850/70 p-4 shadow-lg shadow-black/20;
+  }
+  .card-hero {
+    @apply rounded-2xl border border-ink-600/70 bg-ink-800 p-6 shadow-xl shadow-black/30;
+  }
+
+  /* Label/eyebrow em sentence case (o `.label` legado fica até migrar). */
+  .eyebrow {
+    @apply text-xs font-medium tracking-wide text-slate-400;
   }
   .label {
     @apply text-xs font-medium uppercase tracking-wide text-slate-400;
+  }
+
+  /* Força tabular quando preciso pontualmente. */
+  .tnum {
+    font-feature-settings: 'tnum' 1;
   }
 }

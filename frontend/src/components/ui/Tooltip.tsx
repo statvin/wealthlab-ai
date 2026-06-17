@@ -1,0 +1,30 @@
+// Tooltip acessível (Radix) — substitui o `title=` nativo e o glifo ⓘ.
+// Operável por teclado, com foco visível no gatilho.
+
+import * as RadixTooltip from '@radix-ui/react-tooltip'
+import type { ReactNode } from 'react'
+
+interface Props {
+  content: ReactNode
+  children: ReactNode
+}
+
+export function Tooltip({ content, children }: Props) {
+  return (
+    <RadixTooltip.Provider delayDuration={150} skipDelayDuration={300}>
+      <RadixTooltip.Root>
+        <RadixTooltip.Trigger asChild>{children}</RadixTooltip.Trigger>
+        <RadixTooltip.Portal>
+          <RadixTooltip.Content
+            sideOffset={6}
+            collisionPadding={8}
+            className="z-50 max-w-xs rounded-lg border border-ink-600 bg-ink-800 px-3 py-2 text-xs leading-relaxed text-slate-200 shadow-xl shadow-black/40"
+          >
+            {content}
+            <RadixTooltip.Arrow className="fill-ink-800" />
+          </RadixTooltip.Content>
+        </RadixTooltip.Portal>
+      </RadixTooltip.Root>
+    </RadixTooltip.Provider>
+  )
+}
