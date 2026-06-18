@@ -33,6 +33,7 @@ htmlcov/
 .claude/
 
 # Documentos locais — não versionar (não devem ir para o GitHub)
+instructions/
 redesign_brief.md
 REDESIGN_BRIEF.md
 docs/REDESIGN_BRIEF.md
