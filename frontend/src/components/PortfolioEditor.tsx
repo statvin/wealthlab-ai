@@ -24,7 +24,7 @@ const NOVO_VAZIO = {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-base-600 bg-base-900 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none'
+  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none'
 
 export function PortfolioEditor({
   holdings,
@@ -70,15 +70,15 @@ export function PortfolioEditor({
   return (
     <div className="space-y-4">
       <div className="card">
-        <h3 className="mb-3 text-sm font-semibold text-slate-300">Minha carteira</h3>
+        <h3 className="mb-3 text-sm font-semibold text-content-body">Minha carteira</h3>
         {holdings.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-content-subtle">
             Carteira vazia. Adicione ativos abaixo para simular sobre eles.
           </p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-slate-400">
+              <tr className="text-left text-content-muted">
                 <th className="font-medium">Classe</th>
                 <th className="font-medium">Ativo</th>
                 <th className="font-medium text-right">Qtd</th>
@@ -90,12 +90,12 @@ export function PortfolioEditor({
             </thead>
             <tbody>
               {holdings.map((h) => (
-                <tr key={h.asset.ticker} className="border-t border-base-600/50">
-                  <td className="py-1 text-slate-400">{CLASSE_LABEL[h.asset.classe]}</td>
+                <tr key={h.asset.ticker} className="border-t border-border">
+                  <td className="py-1 text-content-muted">{CLASSE_LABEL[h.asset.classe]}</td>
                   <td className="py-1">
-                    <span className="font-medium text-slate-100">{h.asset.ticker}</span>
+                    <span className="font-medium text-content">{h.asset.ticker}</span>
                     {h.asset.fixed_income_terms && (
-                      <span className="ml-1 text-xs text-slate-500">
+                      <span className="ml-1 text-xs text-content-subtle">
                         {h.asset.fixed_income_terms.indexador} {h.asset.fixed_income_terms.taxa_contratada}
                       </span>
                     )}
@@ -103,13 +103,13 @@ export function PortfolioEditor({
                   <td className="py-1 text-right">{h.quantidade}</td>
                   <td className="py-1 text-right">{fmtBRL(h.preco_inicial ?? 1)}</td>
                   <td className="py-1 text-right">{fmtBRL(valorHolding(h))}</td>
-                  <td className="py-1 text-right text-slate-400">
+                  <td className="py-1 text-right text-content-muted">
                     {total > 0 ? fmtPct(valorHolding(h) / total) : '—'}
                   </td>
                   <td className="py-1 text-right">
                     <button
                       onClick={() => onChange(holdings.filter((x) => x.asset.ticker !== h.asset.ticker))}
-                      className="text-rose-400 hover:text-rose-300"
+                      className="text-loss transition-colors hover:text-loss/70"
                       aria-label={`Remover ${h.asset.ticker}`}
                     >
                       ✕
@@ -117,11 +117,11 @@ export function PortfolioEditor({
                   </td>
                 </tr>
               ))}
-              <tr className="border-t border-base-600">
-                <td colSpan={4} className="py-1 font-medium text-slate-300">
+              <tr className="border-t border-border">
+                <td colSpan={4} className="py-1 font-medium text-content-body">
                   Total
                 </td>
-                <td className="py-1 text-right font-medium text-slate-100">{fmtBRL(total)}</td>
+                <td className="py-1 text-right font-medium text-content">{fmtBRL(total)}</td>
                 <td colSpan={2} />
               </tr>
             </tbody>
@@ -130,7 +130,7 @@ export function PortfolioEditor({
       </div>
 
       <div className="card">
-        <h3 className="mb-3 text-sm font-semibold text-slate-300">Adicionar ativo</h3>
+        <h3 className="mb-3 text-sm font-semibold text-content-body">Adicionar ativo</h3>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <label className="block">
             <span className="label">Classe</span>
@@ -210,7 +210,7 @@ export function PortfolioEditor({
               <label className="block">
                 <span className="label">
                   Taxa{' '}
-                  <span className="normal-case text-slate-500">
+                  <span className="normal-case text-content-subtle">
                     (CDI: % do índice; IPCA/pré: a.a.)
                   </span>
                 </span>
@@ -234,11 +234,11 @@ export function PortfolioEditor({
           )}
         </div>
 
-        {erro && <p className="mt-2 text-sm text-rose-400">{erro}</p>}
+        {erro && <p className="mt-2 text-sm text-loss">{erro}</p>}
 
         <button
           onClick={adicionar}
-          className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-base-900 hover:bg-accent-soft"
+          className="mt-3 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong"
         >
           Adicionar à carteira
         </button>

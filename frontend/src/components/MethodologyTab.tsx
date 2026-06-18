@@ -26,12 +26,12 @@ function Secao({ titulo, itens, rotulos }: {
 }) {
   return (
     <div className="card">
-      <h3 className="mb-3 text-sm font-semibold text-slate-300">{titulo}</h3>
+      <h3 className="mb-3 text-sm font-semibold text-content-body">{titulo}</h3>
       <dl className="space-y-3">
         {Object.entries(itens).map(([chave, texto]) => (
           <div key={chave}>
-            <dt className="text-sm font-medium text-accent">{rotulos[chave] ?? chave}</dt>
-            <dd className="text-sm text-slate-300">{texto}</dd>
+            <dt className="text-sm font-medium text-brand">{rotulos[chave] ?? chave}</dt>
+            <dd className="text-sm text-content-body">{texto}</dd>
           </div>
         ))}
       </dl>
@@ -42,7 +42,7 @@ function Secao({ titulo, itens, rotulos }: {
 export function MethodologyTab({ metodologia }: { metodologia: Methodology }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-200">
+      <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm text-warning">
         <strong>Aviso.</strong> {metodologia.aviso}
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
@@ -50,8 +50,8 @@ export function MethodologyTab({ metodologia }: { metodologia: Methodology }) {
         <Secao titulo="Métricas" itens={metodologia.metricas} rotulos={TITULOS_METRICAS} />
       </div>
       <div className="card">
-        <h3 className="mb-2 text-sm font-semibold text-slate-300">Stress testing</h3>
-        <p className="text-sm text-slate-300">{metodologia.stress}</p>
+        <h3 className="mb-2 text-sm font-semibold text-content-body">Stress testing</h3>
+        <p className="text-sm text-content-body">{metodologia.stress}</p>
       </div>
     </div>
   )

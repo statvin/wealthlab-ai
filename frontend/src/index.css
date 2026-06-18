@@ -2,43 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tema CLARO (bone/tinta + evergreen) — padrão. Canais RGB para alpha do Tailwind. */
 :root {
+  color-scheme: light;
+  --canvas: 246 244 239; /* #F6F4EF bone quente */
+  --surface: 255 255 255; /* #FFFFFF card */
+  --surface-raised: 251 250 247; /* #FBFAF7 hero/elevado */
+  --border: 231 226 217; /* #E7E2D9 */
+  --content: 20 32 46; /* #14202E título */
+  --content-body: 51 65 85; /* #334155 corpo */
+  --content-muted: 107 114 128; /* #6B7280 secundário */
+  --content-subtle: 154 163 178; /* #9AA3B2 sutil */
+  --brand: 21 113 90; /* #15715A evergreen (chrome) */
+  --brand-strong: 17 94 74; /* #115E4A hover */
+  --on-brand: 255 255 255;
+  --gain: 4 120 87; /* #047857 ganho (dado) */
+  --loss: 185 28 28; /* #B91C1C perda (dado) */
+  --warning: 180 83 9; /* #B45309 amber-700 */
+  --info: 29 78 216; /* #1D4ED8 blue-700 */
+}
+
+/* Tema ESCURO (marinho + evergreen clareado). */
+.dark {
   color-scheme: dark;
+  --canvas: 12 22 38; /* #0C1626 marinho */
+  --surface: 18 32 51; /* #122033 */
+  --surface-raised: 22 38 60; /* #16263C */
+  --border: 36 55 80; /* #243750 */
+  --content: 234 240 247; /* #EAF0F7 */
+  --content-body: 182 196 214; /* #B6C4D6 */
+  --content-muted: 122 139 163; /* #7A8BA3 */
+  --content-subtle: 90 107 131; /* #5A6B83 */
+  --brand: 31 158 120; /* #1F9E78 */
+  --brand-strong: 35 176 132; /* #23B084 */
+  --on-brand: 7 18 13; /* #07120D */
+  --gain: 52 211 153; /* #34D399 */
+  --loss: 251 113 133; /* #FB7185 */
+  --warning: 251 191 36; /* #FBBF24 amber-400 */
+  --info: 96 165 250; /* #60A5FA blue-400 */
 }
 
 body {
-  @apply bg-ink-900 font-sans text-slate-200 antialiased;
-  /* Algarismos tabulares em TODO número: colunas de R$/% alinham dígito a dígito.
-     É o detalhe grau-financeiro que separa produto de protótipo. */
+  @apply bg-canvas font-sans text-content-body antialiased;
+  /* Algarismos tabulares em todo número (colunas de R$/% alinham). */
   font-feature-settings: 'tnum' 1, 'cv11' 1;
 }
 
 @layer components {
-  /* Hierarquia de superfícies (fundo < card < card elevado). */
+  /* Hierarquia de superfícies. Sombras sutis (o escuro separa por surface, não por sombra). */
   .surface {
-    @apply rounded-2xl border border-ink-700/60 bg-ink-850/70;
+    @apply rounded-2xl border border-border bg-surface;
   }
   .surface-elevated {
-    @apply rounded-2xl border border-ink-600/70 bg-ink-800 shadow-xl shadow-black/30;
+    @apply rounded-2xl border border-border bg-surface-raised shadow-lg shadow-black/5;
   }
-
-  /* `.card` continua existindo (migração por fase), agora sobre os tokens novos. */
   .card {
-    @apply rounded-2xl border border-ink-700/60 bg-ink-850/70 p-4 shadow-lg shadow-black/20;
+    @apply rounded-2xl border border-border bg-surface p-4 shadow-sm shadow-black/5;
   }
   .card-hero {
-    @apply rounded-2xl border border-ink-600/70 bg-ink-800 p-6 shadow-xl shadow-black/30;
+    @apply rounded-2xl border border-border bg-surface-raised p-6 shadow-lg shadow-black/5;
   }
-
-  /* Label/eyebrow em sentence case (o `.label` legado fica até migrar). */
   .eyebrow {
-    @apply text-xs font-medium tracking-wide text-slate-400;
+    @apply text-xs font-medium tracking-wide text-content-muted;
   }
   .label {
-    @apply text-xs font-medium uppercase tracking-wide text-slate-400;
+    @apply text-xs font-medium uppercase tracking-wide text-content-muted;
   }
-
-  /* Força tabular quando preciso pontualmente. */
   .tnum {
     font-feature-settings: 'tnum' 1;
   }

@@ -9,7 +9,7 @@ export function Skeleton({ className = '' }: Props) {
   return (
     <div
       aria-hidden="true"
-      className={`motion-safe:animate-pulse rounded-lg bg-ink-700/50 ${className}`}
+      className={`motion-safe:animate-pulse rounded-lg bg-border ${className}`}
     />
   )
 }

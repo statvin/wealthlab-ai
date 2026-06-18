@@ -30,7 +30,7 @@ export function CorrelationHeatmap({ correlacao }: { correlacao: Correlacao }) {
 
   if (correlacao.labels.length === 0) {
     return (
-      <div className="flex h-72 items-center justify-center text-sm text-slate-500">
+      <div className="flex h-72 items-center justify-center text-sm text-content-subtle">
         Sem ativos de renda variável para correlacionar.
       </div>
     )

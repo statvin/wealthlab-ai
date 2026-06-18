@@ -10,7 +10,7 @@ import { NumberField } from './NumberField'
 import { Stat } from './ui/Stat'
 
 const inputCls =
-  'w-full rounded-lg border border-base-600 bg-base-900 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none'
+  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none'
 
 const PADRAO = {
   idade_atual: 35,
@@ -47,7 +47,7 @@ export function RetirementPanel({ simId }: { simId: number | null }) {
 
   if (simId == null) {
     return (
-      <div className="card text-sm text-slate-400">
+      <div className="card text-sm text-content-muted">
         Rode uma simulação primeiro (aba Dashboard) — a análise de aposentadoria usa a sua carteira.
       </div>
     )
@@ -56,8 +56,8 @@ export function RetirementPanel({ simId }: { simId: number | null }) {
   return (
     <div className="space-y-4">
       <div className="card">
-        <h3 className="mb-1 text-sm font-semibold text-slate-300">Posso me aposentar?</h3>
-        <p className="mb-3 text-xs text-slate-500">
+        <h3 className="mb-1 text-sm font-semibold text-content-body">Posso me aposentar?</h3>
+        <p className="mb-3 text-xs text-content-subtle">
           Acumula com aportes até a aposentadoria e depois sustenta os saques até a idade final,
           sobre a carteira atual.
         </p>
@@ -72,11 +72,11 @@ export function RetirementPanel({ simId }: { simId: number | null }) {
         <button
           onClick={() => run(f)}
           disabled={loading}
-          className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-base-900 hover:bg-accent-soft disabled:opacity-50"
+          className="mt-3 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong disabled:opacity-50"
         >
           {loading ? 'Calculando…' : 'Analisar aposentadoria'}
         </button>
-        {error && <p className="mt-2 text-sm text-rose-400">{error}</p>}
+        {error && <p className="mt-2 text-sm text-loss">{error}</p>}
       </div>
 
       {data && (
@@ -84,7 +84,7 @@ export function RetirementPanel({ simId }: { simId: number | null }) {
           <Stat
             label="Prob. de sucesso"
             value={fmtPct(data.prob_sucesso)}
-            tone="accent"
+            tone="gain"
             tooltip="Fração dos cenários em que o dinheiro dura até a idade final com o saque desejado."
           />
           <Stat

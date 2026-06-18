@@ -28,11 +28,11 @@ export function StressPanel({ simId }: { simId: number }) {
   return (
     <div className="card">
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-semibold text-slate-300">Stress — Base vs. Cenário</h3>
+        <h3 className="text-sm font-semibold text-content-body">Stress — Base vs. Cenário</h3>
         <select
           value={preset}
           onChange={(e) => setPreset(e.target.value)}
-          className="rounded-lg border border-base-600 bg-base-900 px-2 py-1 text-sm"
+          className="rounded-lg border border-border bg-canvas px-2 py-1 text-sm text-content focus:border-brand focus:outline-none"
         >
           {PRESETS.map((p) => (
             <option key={p} value={p}>
@@ -43,16 +43,16 @@ export function StressPanel({ simId }: { simId: number }) {
         <button
           onClick={() => run(preset)}
           disabled={loading}
-          className="rounded-lg border border-accent px-3 py-1 text-sm text-accent hover:bg-accent hover:text-base-900 disabled:opacity-50"
+          className="rounded-lg border border-brand px-3 py-1 text-sm text-brand transition-colors hover:bg-brand hover:text-on-brand disabled:opacity-50"
         >
           {loading ? 'Calculando…' : 'Comparar'}
         </button>
       </div>
 
-      {error && <p className="text-sm text-rose-400">{error}</p>}
+      {error && <p className="text-sm text-loss">{error}</p>}
       {data && <Tabela comp={data} />}
       {!data && !loading && (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-content-subtle">
           Escolha um cenário e clique em Comparar. Choques estilizados, não replays exatos.
         </p>
       )}
@@ -63,10 +63,10 @@ export function StressPanel({ simId }: { simId: number }) {
 function Tabela({ comp }: { comp: StressComparacao }) {
   return (
     <>
-      <p className="mb-2 text-xs text-slate-400">{comp.descricao}</p>
+      <p className="mb-2 text-xs text-content-muted">{comp.descricao}</p>
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-slate-400">
+          <tr className="text-left text-content-muted">
             <th className="font-medium">Métrica</th>
             <th className="font-medium">Base</th>
             <th className="font-medium">Stress</th>
@@ -77,10 +77,10 @@ function Tabela({ comp }: { comp: StressComparacao }) {
             const par = comp.resumo[chave]
             if (!par) return null
             return (
-              <tr key={chave} className="border-t border-base-600/50">
-                <td className="py-1 text-slate-300">{rotulo}</td>
+              <tr key={chave} className="border-t border-border">
+                <td className="py-1 text-content-body">{rotulo}</td>
                 <td className="py-1">{fmt(par[0], tipo)}</td>
-                <td className="py-1 text-rose-300">{fmt(par[1], tipo)}</td>
+                <td className="py-1 text-loss">{fmt(par[1], tipo)}</td>
               </tr>
             )
           })}

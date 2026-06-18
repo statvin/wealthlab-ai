@@ -15,6 +15,7 @@ import { Sidebar } from './components/Sidebar'
 import { StressPanel } from './components/StressPanel'
 import { Badge, type BadgeTone } from './components/ui/Badge'
 import { Stat } from './components/ui/Stat'
+import { ThemeToggle } from './components/ui/ThemeToggle'
 import { INPUTS_PADRAO, useSimulation, type SimData, type SimInputs } from './hooks/useSimulation'
 import { CARTEIRA_EXEMPLO } from './lib/defaultPortfolio'
 import { fmtCompactBRL, fmtPct } from './lib/format'
@@ -50,13 +51,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-ink-700/60 bg-ink-850/50 px-4 py-3 backdrop-blur">
+      <header className="border-b border-border bg-surface/70 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-baseline gap-1">
-            <span className="text-lg font-semibold text-accent">WealthLab</span>
-            <span className="text-lg font-light text-slate-400">AI</span>
+            <span className="text-lg font-semibold text-brand">WealthLab</span>
+            <span className="text-lg font-light text-content-muted">AI</span>
           </div>
-          <nav className="flex gap-1 text-sm">
+          <nav className="flex items-center gap-1 text-sm">
             <TabBtn ativo={aba === 'dashboard'} onClick={() => setAba('dashboard')}>
               Dashboard
             </TabBtn>
@@ -69,6 +70,8 @@ export default function App() {
             <TabBtn ativo={aba === 'metodologia'} onClick={() => setAba('metodologia')}>
               Metodologia
             </TabBtn>
+            <span className="mx-1 h-5 w-px bg-border" aria-hidden="true" />
+            <ThemeToggle />
           </nav>
         </div>
       </header>
@@ -85,7 +88,7 @@ export default function App() {
               <button
                 onClick={simular}
                 disabled={loading || holdings.length === 0}
-                className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-ink-950 transition-colors hover:bg-accent-soft disabled:opacity-50"
+                className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong disabled:opacity-50"
               >
                 {loading ? 'Simulando…' : 'Salvar carteira e simular'}
               </button>
@@ -151,13 +154,19 @@ function Dashboard({
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <Stat
             size="hero"
-            tone="accent"
             label={`Patrimônio provável em ${Math.round(inputs.horizonteAnos)} anos`}
             value={fmtCompactBRL(resumo.nominal.p50)}
-            sub={`Hoje: ${fmtCompactBRL(resumo.patrimonio_inicial)}`}
+            sub={
+              <>
+                Hoje {fmtCompactBRL(resumo.patrimonio_inicial)} ·{' '}
+                <span className="text-gain">
+                  +{fmtCompactBRL(resumo.nominal.p50 - resumo.patrimonio_inicial)} projetado
+                </span>
+              </>
+            }
           />
           <div className="lg:max-w-md">
-            <p className="text-lg leading-relaxed text-slate-100 sm:text-xl">{tese.frase}</p>
+            <p className="text-lg leading-relaxed text-content sm:text-xl">{tese.frase}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge>
                 Faixa {fmtCompactBRL(tese.faixaP10)}–{fmtCompactBRL(tese.faixaP90)}
@@ -175,11 +184,11 @@ function Dashboard({
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         <span className="eyebrow">Carteira simulada</span>
         {pesos.map(({ ticker, peso }) => (
-          <span key={ticker} className="text-slate-300">
-            {ticker} <span className="text-slate-500">{fmtPct(peso, 0)}</span>
+          <span key={ticker} className="text-content-body">
+            {ticker} <span className="text-content-subtle">{fmtPct(peso, 0)}</span>
           </span>
         ))}
-        <span className="text-slate-500">· edite na aba “Carteira”</span>
+        <span className="text-content-subtle">· edite na aba “Carteira”</span>
       </div>
 
       <InsightsPanel insights={data.insights} />
@@ -212,7 +221,7 @@ function Dashboard({
         />
       </div>
 
-      {loading && <p className="text-xs text-slate-500">Atualizando…</p>}
+      {loading && <p className="text-xs text-content-subtle">Atualizando…</p>}
 
       <div className="card">
         <h3 className="eyebrow mb-3">Projeção de Monte Carlo (nominal)</h3>
@@ -249,8 +258,8 @@ function TabBtn({
   return (
     <button
       onClick={onClick}
-      className={`rounded-lg px-3 py-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
-        ativo ? 'bg-accent text-ink-950' : 'text-slate-300 hover:bg-ink-700'
+      className={`rounded-lg px-3 py-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 ${
+        ativo ? 'bg-brand text-on-brand' : 'text-content-body hover:bg-surface'
       }`}
     >
       {children}
@@ -260,7 +269,7 @@ function TabBtn({
 
 function Aviso({ texto, tom = 'info' }: { texto: string; tom?: 'info' | 'erro' }) {
   return (
-    <div className={`card text-sm ${tom === 'erro' ? 'text-semantic-danger' : 'text-slate-400'}`}>
+    <div className={`card text-sm ${tom === 'erro' ? 'text-loss' : 'text-content-muted'}`}>
       {texto}
     </div>
   )

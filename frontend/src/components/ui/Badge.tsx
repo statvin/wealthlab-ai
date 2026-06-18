@@ -2,15 +2,15 @@
 
 import type { ReactNode } from 'react'
 
-export type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'accent'
+export type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'brand'
 
 const toneCls: Record<BadgeTone, string> = {
-  neutral: 'border-ink-600 bg-ink-700/40 text-slate-300',
-  success: 'border-semantic-success/30 bg-semantic-success/10 text-semantic-success',
-  warning: 'border-semantic-warning/30 bg-semantic-warning/10 text-semantic-warning',
-  danger: 'border-semantic-danger/30 bg-semantic-danger/10 text-semantic-danger',
-  info: 'border-semantic-info/30 bg-semantic-info/10 text-semantic-info',
-  accent: 'border-accent/30 bg-accent/10 text-accent',
+  neutral: 'border-border bg-canvas text-content-body',
+  success: 'border-gain/30 bg-gain/10 text-gain',
+  warning: 'border-warning/30 bg-warning/10 text-warning',
+  danger: 'border-loss/30 bg-loss/10 text-loss',
+  info: 'border-info/30 bg-info/10 text-info',
+  brand: 'border-brand/30 bg-brand/10 text-brand',
 }
 
 interface Props {

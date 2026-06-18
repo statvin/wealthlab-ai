@@ -1,13 +1,13 @@
 // Primitivo de número: label (eyebrow) + valor, com variantes de tamanho
-// (herói/padrão/pequeno) e cor semântica opcional. Algarismos tabulares.
-// Substitui o KpiCard na Fase 2.
+// (herói/padrão/pequeno). Tom de cor segue a regra de DADO: neutro por padrão,
+// gain/loss apenas quando o número representa ganho/perda. Marca nunca em número.
 
 import type { ReactNode } from 'react'
 
 import { Tooltip } from './Tooltip'
 
 export type StatSize = 'hero' | 'default' | 'sm'
-export type StatTone = 'default' | 'accent' | 'success' | 'warning' | 'danger' | 'info'
+export type StatTone = 'default' | 'gain' | 'loss' | 'muted'
 
 const sizeCls: Record<StatSize, string> = {
   hero: 'text-4xl sm:text-5xl font-semibold tracking-tight',
@@ -16,12 +16,10 @@ const sizeCls: Record<StatSize, string> = {
 }
 
 const toneCls: Record<StatTone, string> = {
-  default: 'text-slate-100',
-  accent: 'text-accent',
-  success: 'text-semantic-success',
-  warning: 'text-semantic-warning',
-  danger: 'text-semantic-danger',
-  info: 'text-semantic-info',
+  default: 'text-content',
+  gain: 'text-gain',
+  loss: 'text-loss',
+  muted: 'text-content-muted',
 }
 
 interface Props {
@@ -43,7 +41,7 @@ export function Stat({ label, value, tooltip, size = 'default', tone = 'default'
             <button
               type="button"
               aria-label={`Sobre: ${label}`}
-              className="rounded text-slate-500 transition-colors hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+              className="rounded text-content-subtle transition-colors hover:text-content-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
             >
               <InfoIcon />
             </button>
@@ -51,7 +49,7 @@ export function Stat({ label, value, tooltip, size = 'default', tone = 'default'
         )}
       </div>
       <div className={`mt-1.5 tnum ${sizeCls[size]} ${toneCls[tone]}`}>{value}</div>
-      {sub && <div className="mt-1 text-sm text-slate-400">{sub}</div>}
+      {sub && <div className="mt-1 text-sm text-content-muted">{sub}</div>}
     </div>
   )
 }

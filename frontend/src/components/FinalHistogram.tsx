@@ -1,12 +1,16 @@
 // Histograma dos patrimônios finais (nominais). Usa as bordas/contagens já
-// calculadas pelo backend — o front só desenha as barras.
+// calculadas pelo backend — o front só desenha as barras. Cor do tema atual.
 
 import { useMemo } from 'react'
 
 import type { Histograma } from '../api/types'
+import { useTheme } from '../hooks/useTheme'
+import { cssRGB } from '../lib/themeColor'
 import { PlotlyChart } from './PlotlyChart'
 
 export function FinalHistogram({ histograma }: { histograma: Histograma }) {
+  const tema = useTheme()
+
   const data = useMemo(() => {
     const { edges, counts } = histograma
     const centros = counts.map((_, i) => (edges[i] + edges[i + 1]) / 2)
@@ -17,11 +21,12 @@ export function FinalHistogram({ histograma }: { histograma: Histograma }) {
         y: counts,
         width: larguras,
         type: 'bar',
-        marker: { color: 'rgba(52,211,153,0.6)', line: { color: '#34d399', width: 0.5 } },
+        marker: { color: cssRGB('--brand', 0.55), line: { color: cssRGB('--brand'), width: 0.5 } },
         hovertemplate: 'R$ %{x:,.0f}: %{y} cenários<extra></extra>',
       },
     ]
-  }, [histograma])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [histograma, tema])
 
   return (
     <PlotlyChart

@@ -1,19 +1,12 @@
-// Wrapper React fino sobre o Plotly (build dist-min). Renderiza num <div> via
-// Plotly.react e limpa no unmount. Mantemos o tema escuro num layout base e
-// fazemos merge raso preservando a grade dos eixos.
+// Wrapper React do Plotly (dist-min). O layout (fundo, fonte, grade) é montado a
+// partir das CSS variables do tema atual e re-renderiza ao alternar claro/escuro.
+// Grade discreta e sem barra de modo — gráfico editorial, não terminal.
 
 import { useEffect, useRef } from 'react'
 import Plotly from 'plotly.js-dist-min'
 
-const BASE_LAYOUT = {
-  paper_bgcolor: 'rgba(0,0,0,0)',
-  plot_bgcolor: 'rgba(0,0,0,0)',
-  font: { color: '#cbd5e1', family: 'ui-sans-serif, system-ui, sans-serif' },
-  margin: { l: 64, r: 16, t: 16, b: 44 },
-  xaxis: { gridcolor: '#27314a', zerolinecolor: '#27314a' },
-  yaxis: { gridcolor: '#27314a', zerolinecolor: '#27314a' },
-  legend: { orientation: 'h', y: -0.2, font: { size: 11 } },
-}
+import { useTheme } from '../hooks/useTheme'
+import { cssRGB } from '../lib/themeColor'
 
 interface Props {
   data: unknown[]
@@ -23,18 +16,38 @@ interface Props {
 
 export function PlotlyChart({ data, layout, className }: Props) {
   const ref = useRef<HTMLDivElement>(null)
+  const tema = useTheme() // dispara re-render ao trocar de tema
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    const eixo = {
+      gridcolor: cssRGB('--border', 0.6),
+      zerolinecolor: cssRGB('--border'),
+      linecolor: cssRGB('--border'),
+      tickfont: { color: cssRGB('--content-muted') },
+    }
+    const base = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      font: {
+        color: cssRGB('--content-muted'),
+        family: 'Inter Variable, ui-sans-serif, system-ui, sans-serif',
+        size: 12,
+      },
+      margin: { l: 64, r: 16, t: 16, b: 44 },
+      xaxis: { ...eixo },
+      yaxis: { ...eixo },
+      legend: { orientation: 'h', y: -0.2, font: { size: 11 } },
+    }
     const merged = {
-      ...BASE_LAYOUT,
+      ...base,
       ...layout,
-      xaxis: { ...BASE_LAYOUT.xaxis, ...(layout?.xaxis as object) },
-      yaxis: { ...BASE_LAYOUT.yaxis, ...(layout?.yaxis as object) },
+      xaxis: { ...base.xaxis, ...(layout?.xaxis as object) },
+      yaxis: { ...base.yaxis, ...(layout?.yaxis as object) },
     }
     Plotly.react(el, data, merged, { responsive: true, displayModeBar: false })
-  }, [data, layout])
+  }, [data, layout, tema])
 
   useEffect(() => {
     const el = ref.current

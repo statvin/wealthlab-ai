@@ -10,12 +10,12 @@ import { CLASSE_LABEL, targetFromHoldings } from '../lib/portfolio'
 import { NumberField } from './NumberField'
 
 const inputCls =
-  'w-full rounded-lg border border-base-600 bg-base-900 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none'
+  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none'
 
 const CORACAO: Record<string, string> = {
-  comprar: 'text-emerald-300',
-  vender: 'text-rose-300',
-  manter: 'text-slate-500',
+  comprar: 'text-gain',
+  vender: 'text-loss',
+  manter: 'text-content-subtle',
 }
 
 export function RebalancePanel({ simId, holdings }: { simId: number; holdings: HoldingDTO[] }) {
@@ -39,8 +39,8 @@ export function RebalancePanel({ simId, holdings }: { simId: number; holdings: H
 
   return (
     <div className="card">
-      <h3 className="mb-1 text-sm font-semibold text-slate-300">Rebalanceamento da carteira</h3>
-      <p className="mb-3 text-xs text-slate-500">
+      <h3 className="mb-1 text-sm font-semibold text-content-body">Rebalanceamento da carteira</h3>
+      <p className="mb-3 text-xs text-content-subtle">
         Defina a alocação-alvo por classe. É uma recomendação pontual de compras/vendas — distinta
         do rebalanceamento que ocorre dentro da simulação.
       </p>
@@ -60,28 +60,28 @@ export function RebalancePanel({ simId, holdings }: { simId: number; holdings: H
       </div>
 
       <div className="mt-2 flex items-center gap-3">
-        <span className={`text-xs ${somaOk ? 'text-slate-400' : 'text-amber-300'}`}>
+        <span className={`text-xs ${somaOk ? 'text-content-muted' : 'text-warning'}`}>
           Soma: {soma.toFixed(1)}% {somaOk ? '' : '(deve ser 100%)'}
         </span>
         <button
           onClick={calcular}
           disabled={loading || !somaOk}
-          className="rounded-lg border border-accent px-3 py-1 text-sm text-accent hover:bg-accent hover:text-base-900 disabled:opacity-50"
+          className="rounded-lg border border-brand px-3 py-1 text-sm text-brand transition-colors hover:bg-brand hover:text-on-brand disabled:opacity-50"
         >
           {loading ? 'Calculando…' : 'Calcular'}
         </button>
       </div>
 
-      {error && <p className="mt-2 text-sm text-rose-400">{error}</p>}
+      {error && <p className="mt-2 text-sm text-loss">{error}</p>}
 
       {data && (
         <div className="mt-4">
-          <p className="mb-2 text-xs text-slate-400">
+          <p className="mb-2 text-xs text-content-muted">
             Movimentação total (turnover): {fmtPct(data.turnover)} do patrimônio.
           </p>
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-slate-400">
+              <tr className="text-left text-content-muted">
                 <th className="font-medium">Ativo</th>
                 <th className="font-medium">Ação</th>
                 <th className="font-medium text-right">Valor</th>
@@ -89,7 +89,7 @@ export function RebalancePanel({ simId, holdings }: { simId: number; holdings: H
             </thead>
             <tbody>
               {data.trades.map((t) => (
-                <tr key={t.ticker} className="border-t border-base-600/50">
+                <tr key={t.ticker} className="border-t border-border">
                   <td className="py-1">{t.ticker}</td>
                   <td className={`py-1 ${CORACAO[t.acao] ?? ''}`}>{t.acao}</td>
                   <td className="py-1 text-right">{t.acao === 'manter' ? '—' : fmtBRL(t.valor)}</td>

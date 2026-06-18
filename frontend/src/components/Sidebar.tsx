@@ -5,7 +5,7 @@ import type { SimInputs } from '../hooks/useSimulation'
 import { NumberField } from './NumberField'
 
 const inputCls =
-  'w-full rounded-lg border border-base-600 bg-base-900 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none'
+  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none'
 
 interface Props {
   inputs: SimInputs
@@ -39,7 +39,7 @@ export function Sidebar({ inputs, onChange, onRun, loading }: Props) {
 
   return (
     <aside className="flex w-full flex-col gap-3 lg:h-full lg:w-72 lg:shrink-0">
-      <h2 className="text-sm font-semibold text-slate-300">Parâmetros</h2>
+      <h2 className="text-sm font-semibold text-content-body">Parâmetros</h2>
 
       <Campo label="Horizonte (anos)" value={inputs.horizonteAnos} onChange={(v) => set('horizonteAnos', v)} />
       <Campo label="Aporte mensal (R$)" value={inputs.aporteMensal} step="100" onChange={(v) => set('aporteMensal', v)} />
@@ -61,7 +61,7 @@ export function Sidebar({ inputs, onChange, onRun, loading }: Props) {
         <select
           value={inputs.rebalanceamento}
           onChange={(e) => set('rebalanceamento', e.target.value as RebalanceMode)}
-          className="mt-1 w-full rounded-lg border border-base-600 bg-base-900 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none"
+          className={`mt-1 ${inputCls}`}
         >
           <option value="ANUAL_AO_ALVO">Anual ao alvo</option>
           <option value="NENHUM">Buy &amp; hold</option>
@@ -71,7 +71,7 @@ export function Sidebar({ inputs, onChange, onRun, loading }: Props) {
       <button
         onClick={onRun}
         disabled={loading}
-        className="mt-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-base-900 transition hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? 'Rodando…' : 'Rodar simulação'}
       </button>

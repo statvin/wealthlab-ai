@@ -1,15 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 
-// Tinta profunda levemente quente — base do tema (private wealth, não trading).
-// Mais degraus de superfície para haver hierarquia real (fundo < card < elevado).
-const ink = {
-  950: '#0A0E14',
-  900: '#0F141C',
-  850: '#141B26',
-  800: '#1A2230',
-  700: '#232D3F',
-  600: '#2E3A50',
-}
+// Tokens semânticos mapeados para CSS variables (canais RGB), o que permite
+// opacidade no Tailwind e troca de valor entre tema claro (:root) e escuro (.dark).
+const tok = (name) => `rgb(var(${name}) / <alpha-value>)`
 
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
@@ -17,22 +10,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink,
-        // Alias: os componentes atuais usam `base-*`. Mantê-lo apontando para
-        // `ink` torna a migração não-destrutiva — nada quebra, e a paleta já
-        // melhora. A troca base→ink acontece fase a fase.
-        base: ink,
-        accent: {
-          DEFAULT: '#2DD4A7', // verde-petróleo sóbrio (confiança > euforia)
-          soft: '#14B88A',
-          dim: '#0E6F57',
-        },
-        semantic: {
-          success: '#34D399',
-          warning: '#FBBF24',
-          danger: '#FB7185',
-          info: '#60A5FA',
-        },
+        canvas: tok('--canvas'),
+        surface: tok('--surface'),
+        'surface-raised': tok('--surface-raised'),
+        border: tok('--border'),
+        content: tok('--content'),
+        'content-body': tok('--content-body'),
+        'content-muted': tok('--content-muted'),
+        'content-subtle': tok('--content-subtle'),
+        brand: tok('--brand'),
+        'brand-strong': tok('--brand-strong'),
+        'on-brand': tok('--on-brand'),
+        // Semânticos de DADO (só colados a valores): ganho/perda.
+        gain: tok('--gain'),
+        loss: tok('--loss'),
+        // Estados auxiliares (badges/insights/erros de UI).
+        warning: tok('--warning'),
+        info: tok('--info'),
       },
       fontFamily: {
         sans: ['Inter Variable', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],

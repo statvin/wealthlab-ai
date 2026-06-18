@@ -77,7 +77,7 @@ export function TickerAutocomplete({ value, onChangeText, onSelect, placeholder,
       />
 
       {aberto && sugestoes.length > 0 && (
-        <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-base-600 bg-base-800 shadow-xl">
+        <ul className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-surface-raised shadow-xl shadow-black/10">
           {sugestoes.map((t, i) => (
             <li key={t.ticker}>
               <button
@@ -89,11 +89,11 @@ export function TickerAutocomplete({ value, onChangeText, onSelect, placeholder,
                 }}
                 onMouseEnter={() => setAtivo(i)}
                 className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm ${
-                  i === ativo ? 'bg-base-600 text-slate-100' : 'text-slate-300'
+                  i === ativo ? 'bg-canvas text-content' : 'text-content-body'
                 }`}
               >
                 <span className="font-medium">{t.ticker}</span>
-                <span className="truncate text-xs text-slate-400">{t.nome}</span>
+                <span className="truncate text-xs text-content-muted">{t.nome}</span>
               </button>
             </li>
           ))}

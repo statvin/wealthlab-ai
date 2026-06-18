@@ -18,10 +18,10 @@ export function Tooltip({ content, children }: Props) {
           <RadixTooltip.Content
             sideOffset={6}
             collisionPadding={8}
-            className="z-50 max-w-xs rounded-lg border border-ink-600 bg-ink-800 px-3 py-2 text-xs leading-relaxed text-slate-200 shadow-xl shadow-black/40"
+            className="z-50 max-w-xs rounded-lg border border-border bg-surface-raised px-3 py-2 text-xs leading-relaxed text-content-body shadow-xl shadow-black/10"
           >
             {content}
-            <RadixTooltip.Arrow className="fill-ink-800" />
+            <RadixTooltip.Arrow className="fill-surface-raised" />
           </RadixTooltip.Content>
         </RadixTooltip.Portal>
       </RadixTooltip.Root>
