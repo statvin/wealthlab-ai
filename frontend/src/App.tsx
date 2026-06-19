@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
+import { Menu, SlidersHorizontal, X } from 'lucide-react'
 
 import { api } from './api/client'
 import type { HoldingDTO, Methodology } from './api/types'
@@ -7,6 +8,7 @@ import { FinalHistogram } from './components/FinalHistogram'
 import { InsightsPanel } from './components/InsightsPanel'
 import { MethodologyTab } from './components/MethodologyTab'
 import { MonteCarloFunnel } from './components/MonteCarloFunnel'
+import { NavRail, type Aba } from './components/NavRail'
 import { PortfolioEditor } from './components/PortfolioEditor'
 import { RebalancePanel } from './components/RebalancePanel'
 import { RetirementPanel } from './components/RetirementPanel'
@@ -15,14 +17,18 @@ import { Sidebar } from './components/Sidebar'
 import { StressPanel } from './components/StressPanel'
 import { Badge, type BadgeTone } from './components/ui/Badge'
 import { Stat } from './components/ui/Stat'
-import { ThemeToggle } from './components/ui/ThemeToggle'
 import { INPUTS_PADRAO, useSimulation, type SimData, type SimInputs } from './hooks/useSimulation'
 import { CARTEIRA_EXEMPLO } from './lib/defaultPortfolio'
 import { fmtCompactBRL, fmtPct } from './lib/format'
 import { montarTese, type NivelRuina } from './lib/narrative'
-import { pesosPorAtivo } from './lib/portfolio'
+import { pesosPorAtivo, valorTotal } from './lib/portfolio'
 
-type Aba = 'dashboard' | 'carteira' | 'aposentadoria' | 'metodologia'
+const TITULOS: Record<Aba, string> = {
+  dashboard: 'Dashboard',
+  carteira: 'Carteira',
+  aposentadoria: 'Aposentadoria',
+  metodologia: 'Metodologia',
+}
 
 const RUINA_TONE: Record<NivelRuina, BadgeTone> = {
   baixo: 'success',
@@ -35,6 +41,8 @@ export default function App() {
   const [inputs, setInputs] = useState<SimInputs>(INPUTS_PADRAO)
   const [aba, setAba] = useState<Aba>('dashboard')
   const [metodologia, setMetodologia] = useState<Methodology | null>(null)
+  const [navOpen, setNavOpen] = useState(false)
+  const [paramsOpen, setParamsOpen] = useState(false)
   const { loading, error, data, run } = useSimulation()
 
   // Simulação inicial (sobre a carteira-exemplo) + carga da metodologia ao montar.
@@ -44,44 +52,40 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Fecha os overlays com Esc.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setNavOpen(false)
+        setParamsOpen(false)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
   function simular() {
+    setParamsOpen(false)
     setAba('dashboard')
     run(holdings, inputs)
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-border bg-surface/70 px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-baseline gap-1">
-            <span className="text-lg font-semibold text-brand">WealthLab</span>
-            <span className="text-lg font-light text-content-muted">AI</span>
-          </div>
-          <nav className="flex items-center gap-1 text-sm">
-            <TabBtn ativo={aba === 'dashboard'} onClick={() => setAba('dashboard')}>
-              Dashboard
-            </TabBtn>
-            <TabBtn ativo={aba === 'carteira'} onClick={() => setAba('carteira')}>
-              Carteira
-            </TabBtn>
-            <TabBtn ativo={aba === 'aposentadoria'} onClick={() => setAba('aposentadoria')}>
-              Aposentadoria
-            </TabBtn>
-            <TabBtn ativo={aba === 'metodologia'} onClick={() => setAba('metodologia')}>
-              Metodologia
-            </TabBtn>
-            <span className="mx-1 h-5 w-px bg-border" aria-hidden="true" />
-            <ThemeToggle />
-          </nav>
-        </div>
-      </header>
+    <div className="flex min-h-screen">
+      <NavRail aba={aba} onSelect={setAba} open={navOpen} onClose={() => setNavOpen(false)} />
 
-      <main className="mx-auto flex max-w-7xl flex-col gap-6 p-4 sm:p-6 lg:flex-row">
-        {aba === 'dashboard' && (
-          <Sidebar inputs={inputs} onChange={setInputs} onRun={simular} loading={loading} />
-        )}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar
+          titulo={TITULOS[aba]}
+          holdings={holdings}
+          aba={aba}
+          loading={loading}
+          onMenu={() => setNavOpen(true)}
+          onParametros={() => setParamsOpen(true)}
+          onRun={simular}
+        />
 
-        <section className="min-w-0 flex-1 space-y-6">
+        <main className="mx-auto w-full max-w-6xl flex-1 space-y-6 p-4 sm:p-6">
           {aba === 'carteira' && (
             <>
               <PortfolioEditor holdings={holdings} onChange={setHoldings} />
@@ -113,9 +117,97 @@ export default function App() {
               inputs={inputs}
             />
           )}
-        </section>
-      </main>
+        </main>
+      </div>
+
+      {/* Painel de parâmetros (slide-over à direita; funciona no mobile). */}
+      {paramsOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Parâmetros da simulação"
+        >
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setParamsOpen(false)}
+            aria-hidden="true"
+          />
+          <aside className="absolute right-0 top-0 flex h-full w-80 max-w-[90vw] flex-col overflow-auto border-l border-border bg-surface p-4 shadow-xl">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-content">Parâmetros</h2>
+              <button
+                onClick={() => setParamsOpen(false)}
+                aria-label="Fechar parâmetros"
+                className="rounded p-1 text-content-muted transition-colors hover:text-content focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <Sidebar inputs={inputs} onChange={setInputs} onRun={simular} loading={loading} />
+          </aside>
+        </div>
+      )}
     </div>
+  )
+}
+
+function TopBar({
+  titulo,
+  holdings,
+  aba,
+  loading,
+  onMenu,
+  onParametros,
+  onRun,
+}: {
+  titulo: string
+  holdings: HoldingDTO[]
+  aba: Aba
+  loading: boolean
+  onMenu: () => void
+  onParametros: () => void
+  onRun: () => void
+}) {
+  const total = valorTotal(holdings)
+  const n = holdings.length
+  return (
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-canvas/80 px-4 py-3 backdrop-blur sm:px-6">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onMenu}
+          aria-label="Abrir navegação"
+          className="rounded-lg p-1.5 text-content-muted transition-colors hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 lg:hidden"
+        >
+          <Menu size={20} />
+        </button>
+        <h1 className="text-base font-semibold text-content">{titulo}</h1>
+      </div>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <span className="hidden text-sm text-content-muted md:inline">
+          Carteira · <span className="text-content-body">{fmtCompactBRL(total)}</span> · {n}{' '}
+          {n === 1 ? 'ativo' : 'ativos'}
+        </span>
+        {aba === 'dashboard' && (
+          <>
+            <button
+              onClick={onParametros}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-content-body transition-colors hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
+            >
+              <SlidersHorizontal size={16} />
+              <span className="hidden sm:inline">Parâmetros</span>
+            </button>
+            <button
+              onClick={onRun}
+              disabled={loading}
+              className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 disabled:opacity-50"
+            >
+              {loading ? 'Rodando…' : 'Rodar simulação'}
+            </button>
+          </>
+        )}
+      </div>
+    </header>
   )
 }
 
@@ -243,27 +335,6 @@ function Dashboard({
       <StressPanel simId={data.simId} />
       <RebalancePanel simId={data.simId} holdings={holdings} />
     </>
-  )
-}
-
-function TabBtn({
-  ativo,
-  onClick,
-  children,
-}: {
-  ativo: boolean
-  onClick: () => void
-  children: ReactNode
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-lg px-3 py-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 ${
-        ativo ? 'bg-brand text-on-brand' : 'text-content-body hover:bg-surface'
-      }`}
-    >
-      {children}
-    </button>
   )
 }
 

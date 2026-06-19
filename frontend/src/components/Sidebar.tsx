@@ -38,9 +38,7 @@ export function Sidebar({ inputs, onChange, onRun, loading }: Props) {
     onChange({ ...inputs, [k]: v })
 
   return (
-    <aside className="flex w-full flex-col gap-3 lg:h-full lg:w-72 lg:shrink-0">
-      <h2 className="text-sm font-semibold text-content-body">Parâmetros</h2>
-
+    <aside className="flex w-full flex-col gap-3">
       <Campo label="Horizonte (anos)" value={inputs.horizonteAnos} onChange={(v) => set('horizonteAnos', v)} />
       <Campo label="Aporte mensal (R$)" value={inputs.aporteMensal} step="100" onChange={(v) => set('aporteMensal', v)} />
       <Campo label="Saque mensal (R$)" value={inputs.saqueMensal} step="100" onChange={(v) => set('saqueMensal', v)} />
