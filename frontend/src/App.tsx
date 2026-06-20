@@ -16,6 +16,7 @@ import { ResultadoHero } from './components/ResultadoHero'
 import { RiskPanel } from './components/RiskPanel'
 import { SimulationInputs } from './components/SimulationInputs'
 import { StressPanel } from './components/StressPanel'
+import { WelcomePanel } from './components/WelcomePanel'
 import { INPUTS_PADRAO, useSimulation, type SimData, type SimInputs } from './hooks/useSimulation'
 import { CARTEIRA_EXEMPLO } from './lib/defaultPortfolio'
 import { montarTese } from './lib/narrative'
@@ -26,11 +27,16 @@ export default function App() {
   const [aba, setAba] = useState<Aba>('dashboard')
   const [metodologia, setMetodologia] = useState<Methodology | null>(null)
   const [navOpen, setNavOpen] = useState(false)
+  // Primeira visita: mostra boas-vindas em vez de já rodar a simulação de exemplo.
+  const [mostrarBoasVindas, setMostrarBoasVindas] = useState(
+    () => localStorage.getItem('wl-welcomed') !== '1',
+  )
   const { loading, error, data, run } = useSimulation()
 
-  // Simulação inicial (sobre a carteira-exemplo) + carga da metodologia ao montar.
+  // Carga da metodologia ao montar. A simulação inicial só roda se as boas-vindas já
+  // foram dispensadas (do contrário, o usuário escolhe rodar pelo CTA do WelcomePanel).
   useEffect(() => {
-    run(holdings, inputs)
+    if (!mostrarBoasVindas) run(holdings, inputs)
     api.methodology().then(setMetodologia).catch(() => undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -46,6 +52,22 @@ export default function App() {
   function simular() {
     setAba('dashboard')
     run(holdings, inputs)
+  }
+
+  function dispensarBoasVindas() {
+    localStorage.setItem('wl-welcomed', '1')
+    setMostrarBoasVindas(false)
+  }
+
+  function rodarExemplo() {
+    dispensarBoasVindas()
+    setAba('dashboard')
+    run(holdings, inputs)
+  }
+
+  function editarCarteiraDoWelcome() {
+    dispensarBoasVindas()
+    setAba('carteira')
   }
 
   return (
@@ -78,18 +100,25 @@ export default function App() {
               <Aviso texto="Carregando metodologia…" />
             ))}
 
-          {aba === 'dashboard' && (
-            <Dashboard
-              loading={loading}
-              error={error}
-              data={data}
-              inputs={inputs}
-              holdings={holdings}
-              onChange={setInputs}
-              onRun={simular}
-              onEditCarteira={() => setAba('carteira')}
-            />
-          )}
+          {aba === 'dashboard' &&
+            (mostrarBoasVindas ? (
+              <WelcomePanel
+                holdings={holdings}
+                onRunExample={rodarExemplo}
+                onEditPortfolio={editarCarteiraDoWelcome}
+              />
+            ) : (
+              <Dashboard
+                loading={loading}
+                error={error}
+                data={data}
+                inputs={inputs}
+                holdings={holdings}
+                onChange={setInputs}
+                onRun={simular}
+                onEditCarteira={() => setAba('carteira')}
+              />
+            ))}
         </main>
       </div>
     </div>

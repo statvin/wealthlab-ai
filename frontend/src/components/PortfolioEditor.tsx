@@ -2,8 +2,10 @@
 // montada aqui é o que o sistema simula (vira POST /portfolio).
 
 import { useState } from 'react'
+import { Wallet } from 'lucide-react'
 
 import type { AssetClass, HoldingDTO, Indexador } from '../api/types'
+import { CARTEIRA_EXEMPLO } from '../lib/defaultPortfolio'
 import { fmtBRL, fmtPct } from '../lib/format'
 import { CLASSE_LABEL, CLASSES, ehRendaFixa, valorHolding, valorTotal } from '../lib/portfolio'
 import { buscarTicker } from '../lib/tickers'
@@ -72,9 +74,24 @@ export function PortfolioEditor({
       <div className="card">
         <h3 className="mb-3 text-sm font-semibold text-content-body">Minha carteira</h3>
         {holdings.length === 0 ? (
-          <p className="text-sm text-content-subtle">
-            Carteira vazia. Adicione ativos abaixo para simular sobre eles.
-          </p>
+          <div className="flex flex-col items-center gap-3 py-8 text-center">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-raised text-content-muted">
+              <Wallet size={20} aria-hidden="true" />
+            </span>
+            <div>
+              <p className="text-sm font-medium text-content">Sua carteira está vazia</p>
+              <p className="mx-auto mt-1 max-w-sm text-sm text-content-muted">
+                Adicione seu primeiro ativo no formulário abaixo — ações, fundos, cripto ou
+                renda fixa — para o WealthLab simular o futuro dela.
+              </p>
+            </div>
+            <button
+              onClick={() => onChange(CARTEIRA_EXEMPLO)}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-content-body transition-colors hover:bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
+            >
+              Usar carteira de exemplo
+            </button>
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
