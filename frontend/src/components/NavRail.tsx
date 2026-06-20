@@ -68,8 +68,8 @@ export function NavRail({ aba, onSelect, open, onClose }: Props) {
 
   return (
     <>
-      {/* Desktop: rail fixo. */}
-      <aside className="hidden w-[212px] shrink-0 border-r border-border bg-surface lg:block">
+      {/* Desktop: rail fixo, altura de tela cheia, grudado no topo (não rola com a página). */}
+      <aside className="hidden w-[212px] shrink-0 border-r border-border bg-surface lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
         {conteudo}
       </aside>
 
