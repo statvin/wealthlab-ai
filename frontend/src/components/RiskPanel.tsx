@@ -1,4 +1,5 @@
-// Painel de risco: VaR/CVaR (1 ano), drawdown e contribuição ao risco (barras).
+// Painel de risco num card único: VaR/CVaR (1 ano) + drawdown e, abaixo de um
+// divisor, a contribuição ao risco por ativo (barras).
 
 import type { RiskAnalysisOut } from '../api/types'
 import { fmtPct } from '../lib/format'
@@ -7,39 +8,35 @@ export function RiskPanel({ risk }: { risk: RiskAnalysisOut }) {
   const vc = (nivel: number) => risk.var_cvar.find((v) => v.nivel === nivel)
 
   return (
-    <div className="space-y-4">
-      <div className="card">
-        <h3 className="mb-3 text-sm font-semibold text-content-body">
-          Risco de mercado — retorno em 1 ano
-        </h3>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-content-muted">
-              <th className="font-medium">Nível</th>
-              <th className="font-medium">VaR</th>
-              <th className="font-medium">CVaR</th>
+    <div className="card">
+      <h3 className="eyebrow mb-3">Risco de mercado — retorno em 1 ano</h3>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left text-content-muted">
+            <th className="font-medium">Nível</th>
+            <th className="font-medium">VaR</th>
+            <th className="font-medium">CVaR</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[0.95, 0.99].map((n) => (
+            <tr key={n} className="border-t border-border">
+              <td className="py-1">{fmtPct(n, 0)}</td>
+              <td className="py-1 text-loss">{fmtPct(vc(n)?.var ?? 0)}</td>
+              <td className="py-1 text-loss">{fmtPct(vc(n)?.cvar ?? 0)}</td>
             </tr>
-          </thead>
-          <tbody>
-            {[0.95, 0.99].map((n) => (
-              <tr key={n} className="border-t border-border">
-                <td className="py-1">{fmtPct(n, 0)}</td>
-                <td className="py-1 text-loss">{fmtPct(vc(n)?.var ?? 0)}</td>
-                <td className="py-1 text-loss">{fmtPct(vc(n)?.cvar ?? 0)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="mt-3 text-xs text-content-muted">
-          Drawdown — médio {fmtPct(risk.drawdown.medio)} · mediano{' '}
-          {fmtPct(risk.drawdown.mediano)} · pior {fmtPct(risk.drawdown.pior)}
-        </p>
-      </div>
+          ))}
+        </tbody>
+      </table>
+      <p className="mt-3 text-xs text-content-muted">
+        Drawdown — médio {fmtPct(risk.drawdown.medio)} · mediano {fmtPct(risk.drawdown.mediano)} ·
+        pior {fmtPct(risk.drawdown.pior)}
+      </p>
 
-      <div className="card">
-        <h3 className="mb-3 text-sm font-semibold text-content-body">
+      <div className="mt-5 border-t border-border pt-4">
+        <h3 className="eyebrow mb-3">
           Contribuição ao risco{' '}
-          <span className="font-normal text-content-subtle">
+          <span className="font-normal normal-case text-content-subtle">
             (vol. anual {fmtPct(risk.contribuicao.vol_anual_carteira)})
           </span>
         </h3>

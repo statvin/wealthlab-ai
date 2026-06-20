@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Menu } from 'lucide-react'
 
 import { api } from './api/client'
@@ -19,13 +19,6 @@ import { StressPanel } from './components/StressPanel'
 import { INPUTS_PADRAO, useSimulation, type SimData, type SimInputs } from './hooks/useSimulation'
 import { CARTEIRA_EXEMPLO } from './lib/defaultPortfolio'
 import { montarTese } from './lib/narrative'
-
-const TITULOS: Record<Aba, string> = {
-  dashboard: 'Dashboard',
-  carteira: 'Carteira',
-  aposentadoria: 'Aposentadoria',
-  metodologia: 'Metodologia',
-}
 
 export default function App() {
   const [holdings, setHoldings] = useState<HoldingDTO[]>(CARTEIRA_EXEMPLO)
@@ -60,7 +53,7 @@ export default function App() {
       <NavRail aba={aba} onSelect={setAba} open={navOpen} onClose={() => setNavOpen(false)} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar titulo={TITULOS[aba]} onMenu={() => setNavOpen(true)} />
+        <TopBar onMenu={() => setNavOpen(true)} />
 
         <main className="mx-auto w-full max-w-6xl flex-1 p-4 sm:p-6">
           {aba === 'carteira' && (
@@ -103,17 +96,21 @@ export default function App() {
   )
 }
 
-function TopBar({ titulo, onMenu }: { titulo: string; onMenu: () => void }) {
+// Barra mínima só no mobile (o rail está oculto): menu + marca.
+function TopBar({ onMenu }: { onMenu: () => void }) {
   return (
-    <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-canvas/80 px-4 py-3 backdrop-blur sm:px-6">
+    <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-canvas/80 px-4 py-3 backdrop-blur lg:hidden">
       <button
         onClick={onMenu}
         aria-label="Abrir navegação"
-        className="rounded-lg p-1.5 text-content-muted transition-colors hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 lg:hidden"
+        className="rounded-lg p-1.5 text-content-muted transition-colors hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
       >
         <Menu size={20} />
       </button>
-      <h1 className="text-base font-semibold text-content">{titulo}</h1>
+      <span className="text-base">
+        <span className="font-semibold text-brand">WealthLab</span>{' '}
+        <span className="font-light text-content-muted">AI</span>
+      </span>
     </header>
   )
 }
@@ -182,33 +179,49 @@ function Resultados({
 
       {loading && <p className="text-xs text-content-subtle">Atualizando…</p>}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <section className="card">
-            <h2 className="eyebrow mb-3">Projeção de Monte Carlo</h2>
-            <MonteCarloFunnel funil={results.funil} />
-          </section>
-          <div className="grid gap-6 sm:grid-cols-2">
-            <section className="card">
-              <h2 className="eyebrow mb-3">Distribuição dos finais</h2>
-              <FinalHistogram histograma={results.histograma} />
-            </section>
-            <section className="card">
-              <h2 className="eyebrow mb-3">Correlação (renda variável)</h2>
-              <CorrelationHeatmap correlacao={results.correlacao} />
-            </section>
+      <InsightsPanel insights={data.insights} />
+
+      <Secao titulo="Trajetória" sub="Como o patrimônio evolui ao longo do tempo e onde pode terminar">
+        <div className="card">
+          <h3 className="eyebrow mb-3">Projeção de Monte Carlo</h3>
+          <MonteCarloFunnel funil={results.funil} />
+        </div>
+        <div className="card">
+          <h3 className="eyebrow mb-3">Distribuição dos patrimônios finais</h3>
+          <FinalHistogram histograma={results.histograma} />
+        </div>
+      </Secao>
+
+      <Secao titulo="Risco" sub="Quanto pode cair e de onde vem o risco da carteira">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <RiskPanel risk={risk} />
+          <div className="card">
+            <h3 className="eyebrow mb-3">Correlação (renda variável)</h3>
+            <CorrelationHeatmap correlacao={results.correlacao} />
           </div>
         </div>
+      </Secao>
 
-        <div className="space-y-6">
-          <InsightsPanel insights={data.insights} />
-          <RiskPanel risk={risk} />
-        </div>
-      </div>
+      <Secao titulo="Cenários de stress" sub="Como a carteira se comporta em crises estilizadas — choques, não replays">
+        <StressPanel simId={data.simId} />
+      </Secao>
 
-      <StressPanel simId={data.simId} />
-      <RebalancePanel simId={data.simId} holdings={holdings} />
+      <Secao titulo="Rebalanceamento" sub="Compras e vendas para voltar à alocação-alvo">
+        <RebalancePanel simId={data.simId} holdings={holdings} />
+      </Secao>
     </>
+  )
+}
+
+function Secao({ titulo, sub, children }: { titulo: string; sub?: string; children: ReactNode }) {
+  return (
+    <section className="space-y-4">
+      <div>
+        <h2 className="text-base font-semibold text-content">{titulo}</h2>
+        {sub && <p className="mt-0.5 text-sm text-content-muted">{sub}</p>}
+      </div>
+      {children}
+    </section>
   )
 }
 
