@@ -4,6 +4,7 @@ import { Menu } from 'lucide-react'
 import { api } from './api/client'
 import type { HoldingDTO, Methodology } from './api/types'
 import { CorrelationHeatmap } from './components/CorrelationHeatmap'
+import { ErrorState } from './components/ErrorState'
 import { FinalHistogram } from './components/FinalHistogram'
 import { InsightsPanel } from './components/InsightsPanel'
 import { MethodologyTab } from './components/MethodologyTab'
@@ -14,6 +15,7 @@ import { RebalancePanel } from './components/RebalancePanel'
 import { RetirementPanel } from './components/RetirementPanel'
 import { ResultadoHero } from './components/ResultadoHero'
 import { RiskPanel } from './components/RiskPanel'
+import { MetodologiaSkeleton, ResultadosSkeleton } from './components/Skeletons'
 import { SimulationInputs } from './components/SimulationInputs'
 import { StressPanel } from './components/StressPanel'
 import { WelcomePanel } from './components/WelcomePanel'
@@ -97,7 +99,7 @@ export default function App() {
             (metodologia ? (
               <MethodologyTab metodologia={metodologia} />
             ) : (
-              <Aviso texto="Carregando metodologia…" />
+              <MetodologiaSkeleton />
             ))}
 
           {aba === 'dashboard' &&
@@ -175,12 +177,9 @@ function Dashboard({
       />
 
       {error ? (
-        <Aviso
-          texto={`Erro ao rodar a simulação: ${error}. A API está no ar (uvicorn) e o cache de preços está populado?`}
-          tom="erro"
-        />
+        <ErrorState detalhe={error} onRetry={onRun} />
       ) : !data ? (
-        <Aviso texto="Rodando simulação…" />
+        <ResultadosSkeleton />
       ) : (
         <Resultados data={data} inputs={inputs} holdings={holdings} loading={loading} />
       )}
@@ -206,7 +205,15 @@ function Resultados({
     <>
       <ResultadoHero resumo={resumo} risk={risk} tese={tese} />
 
-      {loading && <p className="text-xs text-content-subtle">Atualizando…</p>}
+      {loading && (
+        <div className="flex items-center gap-2 text-xs text-content-muted" aria-live="polite">
+          <span
+            className="h-1.5 w-1.5 rounded-full bg-brand motion-safe:animate-pulse"
+            aria-hidden="true"
+          />
+          Atualizando projeção…
+        </div>
+      )}
 
       <InsightsPanel insights={data.insights} />
 
@@ -251,13 +258,5 @@ function Secao({ titulo, sub, children }: { titulo: string; sub?: string; childr
       </div>
       {children}
     </section>
-  )
-}
-
-function Aviso({ texto, tom = 'info' }: { texto: string; tom?: 'info' | 'erro' }) {
-  return (
-    <div className={`card text-sm ${tom === 'erro' ? 'text-loss' : 'text-content-muted'}`}>
-      {texto}
-    </div>
   )
 }
