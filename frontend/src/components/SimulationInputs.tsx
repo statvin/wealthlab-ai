@@ -11,7 +11,7 @@ import { pesosPorAtivo } from '../lib/portfolio'
 import { NumberField } from './NumberField'
 
 const inputCls =
-  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none'
+  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/50'
 
 interface Props {
   holdings: HoldingDTO[]

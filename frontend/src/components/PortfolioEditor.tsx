@@ -26,7 +26,7 @@ const NOVO_VAZIO = {
 }
 
 const inputCls =
-  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none'
+  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/50'
 
 export function PortfolioEditor({
   holdings,
@@ -126,7 +126,7 @@ export function PortfolioEditor({
                   <td className="py-1 text-right">
                     <button
                       onClick={() => onChange(holdings.filter((x) => x.asset.ticker !== h.asset.ticker))}
-                      className="text-loss transition-colors hover:text-loss/70"
+                      className="rounded px-1 text-loss transition-colors hover:text-loss/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
                       aria-label={`Remover ${h.asset.ticker}`}
                     >
                       ✕
@@ -255,7 +255,7 @@ export function PortfolioEditor({
 
         <button
           onClick={adicionar}
-          className="mt-3 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong"
+          className="mt-3 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
         >
           Adicionar à carteira
         </button>

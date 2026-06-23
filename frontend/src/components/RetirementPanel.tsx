@@ -10,7 +10,7 @@ import { NumberField } from './NumberField'
 import { Stat } from './ui/Stat'
 
 const inputCls =
-  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none'
+  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/50'
 
 const PADRAO = {
   idade_atual: 35,
@@ -72,7 +72,7 @@ export function RetirementPanel({ simId }: { simId: number | null }) {
         <button
           onClick={() => run(f)}
           disabled={loading}
-          className="mt-3 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong disabled:opacity-50"
+          className="mt-3 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 disabled:opacity-50"
         >
           {loading ? 'Calculando…' : 'Analisar aposentadoria'}
         </button>

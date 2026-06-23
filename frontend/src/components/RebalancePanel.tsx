@@ -10,7 +10,7 @@ import { CLASSE_LABEL, targetFromHoldings } from '../lib/portfolio'
 import { NumberField } from './NumberField'
 
 const inputCls =
-  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none'
+  'w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-content focus:border-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/50'
 
 const CORACAO: Record<string, string> = {
   comprar: 'text-gain',
@@ -66,7 +66,7 @@ export function RebalancePanel({ simId, holdings }: { simId: number; holdings: H
         <button
           onClick={calcular}
           disabled={loading || !somaOk}
-          className="rounded-lg border border-brand px-3 py-1 text-sm text-brand transition-colors hover:bg-brand hover:text-on-brand disabled:opacity-50"
+          className="rounded-lg border border-brand px-3 py-1 text-sm text-brand transition-colors hover:bg-brand hover:text-on-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 disabled:opacity-50"
         >
           {loading ? 'Calculando…' : 'Calcular'}
         </button>

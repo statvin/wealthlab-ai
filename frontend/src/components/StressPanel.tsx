@@ -32,7 +32,7 @@ export function StressPanel({ simId }: { simId: number }) {
         <select
           value={preset}
           onChange={(e) => setPreset(e.target.value)}
-          className="rounded-lg border border-border bg-canvas px-2 py-1 text-sm text-content focus:border-brand focus:outline-none"
+          className="rounded-lg border border-border bg-canvas px-2 py-1 text-sm text-content focus:border-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/50"
         >
           {PRESETS.map((p) => (
             <option key={p} value={p}>
@@ -43,7 +43,7 @@ export function StressPanel({ simId }: { simId: number }) {
         <button
           onClick={() => run(preset)}
           disabled={loading}
-          className="rounded-lg border border-brand px-3 py-1 text-sm text-brand transition-colors hover:bg-brand hover:text-on-brand disabled:opacity-50"
+          className="rounded-lg border border-brand px-3 py-1 text-sm text-brand transition-colors hover:bg-brand hover:text-on-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 disabled:opacity-50"
         >
           {loading ? 'Calculando…' : 'Comparar'}
         </button>

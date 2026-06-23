@@ -1,14 +1,11 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { Menu } from 'lucide-react'
 
 import { api } from './api/client'
 import type { HoldingDTO, Methodology } from './api/types'
-import { CorrelationHeatmap } from './components/CorrelationHeatmap'
 import { ErrorState } from './components/ErrorState'
-import { FinalHistogram } from './components/FinalHistogram'
 import { InsightsPanel } from './components/InsightsPanel'
 import { MethodologyTab } from './components/MethodologyTab'
-import { MonteCarloFunnel } from './components/MonteCarloFunnel'
 import { NavRail, type Aba } from './components/NavRail'
 import { PortfolioEditor } from './components/PortfolioEditor'
 import { RebalancePanel } from './components/RebalancePanel'
@@ -18,9 +15,22 @@ import { RiskPanel } from './components/RiskPanel'
 import { MetodologiaSkeleton, ResultadosSkeleton } from './components/Skeletons'
 import { SimulationInputs } from './components/SimulationInputs'
 import { StressPanel } from './components/StressPanel'
+import { Skeleton } from './components/ui/Skeleton'
 import { WelcomePanel } from './components/WelcomePanel'
 import { INPUTS_PADRAO, useSimulation, type SimData, type SimInputs } from './hooks/useSimulation'
 import { CARTEIRA_EXEMPLO } from './lib/defaultPortfolio'
+
+// Gráficos carregados sob demanda: tiram o Plotly (~1,5MB) do bundle inicial, deixando
+// o first paint leve. Cada um cai num chunk próprio, buscado só quando há resultados.
+const MonteCarloFunnel = lazy(() =>
+  import('./components/MonteCarloFunnel').then((m) => ({ default: m.MonteCarloFunnel })),
+)
+const FinalHistogram = lazy(() =>
+  import('./components/FinalHistogram').then((m) => ({ default: m.FinalHistogram })),
+)
+const CorrelationHeatmap = lazy(() =>
+  import('./components/CorrelationHeatmap').then((m) => ({ default: m.CorrelationHeatmap })),
+)
 import { montarTese } from './lib/narrative'
 
 export default function App() {
@@ -86,7 +96,7 @@ export default function App() {
               <button
                 onClick={simular}
                 disabled={loading || holdings.length === 0}
-                className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong disabled:opacity-50"
+                className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand transition-colors hover:bg-brand-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 disabled:opacity-50"
               >
                 {loading ? 'Simulando…' : 'Salvar carteira e simular'}
               </button>
@@ -220,11 +230,15 @@ function Resultados({
       <Secao titulo="Trajetória" sub="Como o patrimônio evolui ao longo do tempo e onde pode terminar">
         <div className="card">
           <h3 className="eyebrow mb-3">Projeção de Monte Carlo</h3>
-          <MonteCarloFunnel funil={results.funil} />
+          <Suspense fallback={<Skeleton className="h-80 w-full" />}>
+            <MonteCarloFunnel funil={results.funil} />
+          </Suspense>
         </div>
         <div className="card">
           <h3 className="eyebrow mb-3">Distribuição dos patrimônios finais</h3>
-          <FinalHistogram histograma={results.histograma} />
+          <Suspense fallback={<Skeleton className="h-72 w-full" />}>
+            <FinalHistogram histograma={results.histograma} />
+          </Suspense>
         </div>
       </Secao>
 
@@ -233,7 +247,9 @@ function Resultados({
           <RiskPanel risk={risk} />
           <div className="card">
             <h3 className="eyebrow mb-3">Correlação (renda variável)</h3>
-            <CorrelationHeatmap correlacao={results.correlacao} />
+            <Suspense fallback={<Skeleton className="h-72 w-full" />}>
+              <CorrelationHeatmap correlacao={results.correlacao} />
+            </Suspense>
           </div>
         </div>
       </Secao>
