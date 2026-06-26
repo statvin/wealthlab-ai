@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
-import { Menu } from 'lucide-react'
 
 import { api } from './api/client'
 import type { HoldingDTO, Methodology } from './api/types'
@@ -16,6 +15,7 @@ import { MetodologiaSkeleton, ResultadosSkeleton } from './components/Skeletons'
 import { SimulationInputs } from './components/SimulationInputs'
 import { StressPanel } from './components/StressPanel'
 import { Skeleton } from './components/ui/Skeleton'
+import { ThemeToggle } from './components/ui/ThemeToggle'
 import { WelcomePanel } from './components/WelcomePanel'
 import { INPUTS_PADRAO, useSimulation, type SimData, type SimInputs } from './hooks/useSimulation'
 import { CARTEIRA_EXEMPLO } from './lib/defaultPortfolio'
@@ -38,7 +38,6 @@ export default function App() {
   const [inputs, setInputs] = useState<SimInputs>(INPUTS_PADRAO)
   const [aba, setAba] = useState<Aba>('dashboard')
   const [metodologia, setMetodologia] = useState<Methodology | null>(null)
-  const [navOpen, setNavOpen] = useState(false)
   // Primeira visita: mostra boas-vindas em vez de já rodar a simulação de exemplo.
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(
     () => localStorage.getItem('wl-welcomed') !== '1',
@@ -51,14 +50,6 @@ export default function App() {
     if (!mostrarBoasVindas) run(holdings, inputs)
     api.methodology().then(setMetodologia).catch(() => undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setNavOpen(false)
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
   }, [])
 
   function simular() {
@@ -83,13 +74,13 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <NavRail aba={aba} onSelect={setAba} open={navOpen} onClose={() => setNavOpen(false)} />
+    <div className="flex min-h-screen bg-canvas">
+      <NavRail aba={aba} onSelect={setAba} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar onMenu={() => setNavOpen(true)} />
+        <Topbar aba={aba} />
 
-        <main className="mx-auto w-full max-w-6xl flex-1 p-4 sm:p-6">
+        <main className="mx-auto w-full max-w-[1320px] flex-1 px-7 pb-10 pt-6">
           {aba === 'carteira' && (
             <div className="space-y-6">
               <PortfolioEditor holdings={holdings} onChange={setHoldings} />
@@ -137,21 +128,41 @@ export default function App() {
   )
 }
 
-// Barra mínima só no mobile (o rail está oculto): menu + marca.
-function TopBar({ onMenu }: { onMenu: () => void }) {
+const ABA_LABEL: Record<Aba, string> = {
+  dashboard: 'Dashboard',
+  carteira: 'Carteira',
+  aposentadoria: 'Aposentadoria',
+  metodologia: 'Metodologia',
+}
+
+// Topbar Eclipse: marca + chip da aba à esquerda; selo "ao vivo" + tema + avatar à direita.
+function Topbar({ aba }: { aba: Aba }) {
   return (
-    <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-canvas/80 px-4 py-3 backdrop-blur lg:hidden">
-      <button
-        onClick={onMenu}
-        aria-label="Abrir navegação"
-        className="rounded-lg p-1.5 text-content-muted transition-colors hover:bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
-      >
-        <Menu size={20} />
-      </button>
-      <span className="text-base">
-        <span className="font-semibold text-brand">WealthLab</span>{' '}
-        <span className="font-light text-content-muted">AI</span>
-      </span>
+    <header className="flex items-center justify-between border-b border-hairline bg-chrome px-7 py-4">
+      <div className="flex items-center gap-2.5">
+        <span className="text-base tracking-tight">
+          <span className="font-semibold text-content">WealthLab</span>{' '}
+          <span className="font-normal text-content-muted">AI</span>
+        </span>
+        <span className="rounded-md border border-border px-2 py-[3px] text-[11px] text-content-muted">
+          {ABA_LABEL[aba]}
+        </span>
+      </div>
+      <div className="flex items-center gap-3.5">
+        <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border px-2.5 py-[5px] text-xs text-content-muted">
+          <span
+            className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand motion-safe:animate-[wlpulse_2.4s_ease-in-out_infinite]"
+            style={{ boxShadow: '0 0 8px rgb(var(--brand))' }}
+            aria-hidden="true"
+          />
+          Projeção ao vivo
+        </span>
+        <ThemeToggle />
+        <div
+          className="h-[30px] w-[30px] rounded-full border border-border bg-gradient-to-br from-surface-raised to-border"
+          aria-hidden="true"
+        />
+      </div>
     </header>
   )
 }

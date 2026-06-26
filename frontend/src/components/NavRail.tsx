@@ -1,10 +1,8 @@
-// Barra de navegação à esquerda (a moldura do app). No desktop fica fixa; no
-// mobile vira um drawer. Marca + itens com ícone; Metodologia num grupo
-// "referência" mais quieto (é documentação). Toggle de tema no rodapé.
+// Nav rail Eclipse: 64px, só ícones. Monograma da marca no topo (3 barras mint),
+// itens principais e Metodologia ancorada na base (mt-auto). Item ativo = quadrado
+// mint. Sempre visível (inclusive mobile — é estreito). Labels via aria-label/title.
 
 import { BookOpen, LayoutDashboard, Umbrella, Wallet, type LucideIcon } from 'lucide-react'
-
-import { ThemeToggle } from './ui/ThemeToggle'
 
 export type Aba = 'dashboard' | 'carteira' | 'aposentadoria' | 'metodologia'
 
@@ -20,83 +18,54 @@ const PRINCIPAIS: ItemDef[] = [
   { id: 'aposentadoria', label: 'Aposentadoria', Icone: Umbrella },
 ]
 
-const REFERENCIA: ItemDef[] = [{ id: 'metodologia', label: 'Metodologia', Icone: BookOpen }]
+const RODAPE: ItemDef = { id: 'metodologia', label: 'Metodologia', Icone: BookOpen }
 
-interface Props {
-  aba: Aba
-  onSelect: (a: Aba) => void
-  open: boolean
-  onClose: () => void
-}
-
-export function NavRail({ aba, onSelect, open, onClose }: Props) {
-  const escolher = (a: Aba) => {
-    onSelect(a)
-    onClose()
-  }
-
-  const conteudo = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-sm font-bold text-on-brand">
-          W
-        </span>
-        <span className="text-base">
-          <span className="font-semibold text-content">WealthLab</span>{' '}
-          <span className="font-light text-content-muted">AI</span>
-        </span>
-      </div>
-
-      <nav className="flex-1 space-y-1 px-3" aria-label="Navegação principal">
-        {PRINCIPAIS.map((it) => (
-          <Item key={it.id} {...it} ativo={aba === it.id} onClick={() => escolher(it.id)} />
-        ))}
-        <p className="px-3 pb-1 pt-5 text-[11px] uppercase tracking-wider text-content-subtle">
-          Referência
-        </p>
-        {REFERENCIA.map((it) => (
-          <Item key={it.id} {...it} ativo={aba === it.id} onClick={() => escolher(it.id)} />
-        ))}
-      </nav>
-
-      <div className="flex items-center justify-between border-t border-border px-4 py-3">
-        <span className="text-xs text-content-subtle">Conta · em breve</span>
-        <ThemeToggle />
-      </div>
-    </div>
-  )
-
+export function NavRail({ aba, onSelect }: { aba: Aba; onSelect: (a: Aba) => void }) {
   return (
-    <>
-      {/* Desktop: rail fixo, altura de tela cheia, grudado no topo (não rola com a página). */}
-      <aside className="hidden w-[212px] shrink-0 border-r border-border bg-surface lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto">
-        {conteudo}
-      </aside>
+    <aside className="flex w-16 shrink-0 flex-col items-center gap-2 border-r border-hairline bg-chrome py-[18px]">
+      <div
+        className="mb-3.5 flex h-[26px] items-end gap-[2.5px] rounded-lg border border-brand/35 bg-brand/15 p-1.5"
+        aria-hidden="true"
+      >
+        <span className="block w-[3px] rounded-sm bg-brand" style={{ height: 7 }} />
+        <span className="block w-[3px] rounded-sm bg-brand" style={{ height: 11 }} />
+        <span className="block w-[3px] rounded-sm bg-brand" style={{ height: 15 }} />
+      </div>
 
-      {/* Mobile: drawer. */}
-      {open && (
-        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
-          <aside className="absolute left-0 top-0 h-full w-[260px] max-w-[85vw] border-r border-border bg-surface">
-            {conteudo}
-          </aside>
-        </div>
-      )}
-    </>
+      {PRINCIPAIS.map((it) => (
+        <Item key={it.id} {...it} ativo={aba === it.id} onClick={() => onSelect(it.id)} />
+      ))}
+
+      <Item
+        {...RODAPE}
+        ativo={aba === RODAPE.id}
+        onClick={() => onSelect(RODAPE.id)}
+        className="mt-auto"
+      />
+    </aside>
   )
 }
 
-function Item({ label, Icone, ativo, onClick }: ItemDef & { ativo: boolean; onClick: () => void }) {
+function Item({
+  label,
+  Icone,
+  ativo,
+  onClick,
+  className = '',
+}: ItemDef & { ativo: boolean; onClick: () => void; className?: string }) {
   return (
     <button
       onClick={onClick}
+      aria-label={label}
       aria-current={ativo ? 'page' : undefined}
-      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 ${
-        ativo ? 'bg-brand/10 font-medium text-brand' : 'text-content-body hover:bg-canvas'
-      }`}
+      title={label}
+      className={`flex h-10 w-10 items-center justify-center rounded-[11px] border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 ${
+        ativo
+          ? 'border-brand/30 bg-brand/10 text-brand'
+          : 'border-transparent text-content-muted hover:bg-surface hover:text-content-body'
+      } ${className}`}
     >
       <Icone size={18} aria-hidden="true" />
-      {label}
     </button>
   )
 }

@@ -13,7 +13,9 @@ export default {
         canvas: tok('--canvas'),
         surface: tok('--surface'),
         'surface-raised': tok('--surface-raised'),
+        chrome: tok('--chrome'),
         border: tok('--border'),
+        hairline: tok('--hairline'),
         content: tok('--content'),
         'content-body': tok('--content-body'),
         'content-muted': tok('--content-muted'),
@@ -29,7 +31,7 @@ export default {
         info: tok('--info'),
       },
       fontFamily: {
-        sans: ['Inter Variable', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Space Grotesk Variable', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
     },
   },

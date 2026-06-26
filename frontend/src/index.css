@@ -2,73 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tema CLARO (bone/tinta + evergreen) — padrão. Canais RGB para alpha do Tailwind. */
+/* ===========================================================================
+   Paleta "Eclipse". Tokens em canais RGB (permitem alpha no Tailwind) e trocam
+   de valor entre tema claro (:root) e escuro (.dark — a identidade premium do
+   spec). Níveis de superfície: canvas (fundo) < chrome (rail/topbar) < surface
+   (cards) < surface-raised (tooltip/realce). hairline = divisórias finas.
+   =========================================================================== */
+
+/* Tema CLARO (adaptação clara da estrutura Eclipse — o designer só specou o escuro). */
 :root {
   color-scheme: light;
-  --canvas: 246 244 239; /* #F6F4EF bone quente */
-  --surface: 255 255 255; /* #FFFFFF card */
-  --surface-raised: 251 250 247; /* #FBFAF7 hero/elevado */
-  --border: 231 226 217; /* #E7E2D9 */
-  --content: 20 32 46; /* #14202E título */
-  --content-body: 51 65 85; /* #334155 corpo */
-  --content-muted: 92 100 112; /* #5C6470 secundário (contraste AA) */
-  --content-subtle: 103 112 126; /* #67707E sutil (contraste AA) */
-  --brand: 21 113 90; /* #15715A evergreen (chrome) */
-  --brand-strong: 17 94 74; /* #115E4A hover */
+  --canvas: 244 246 245; /* #F4F6F5 */
+  --surface: 255 255 255; /* #FFFFFF cards */
+  --chrome: 249 250 250; /* #F9FAFA rail/topbar/itens */
+  --surface-raised: 241 243 243; /* #F1F3F3 realce/tooltip */
+  --border: 223 227 228; /* #DFE3E4 */
+  --hairline: 235 238 238; /* #EBEEEE divisórias finas */
+  --content: 16 23 28; /* #10171C título/números */
+  --content-body: 74 86 94; /* #4A565E corpo */
+  --content-muted: 92 103 114; /* #5C6772 secundário (AA) */
+  --content-subtle: 103 112 126; /* #67707E sutil (AA) */
+  --brand: 11 125 91; /* #0B7D5B mint profundo (chrome/accent) */
+  --brand-strong: 8 102 74; /* #08664A hover */
   --on-brand: 255 255 255;
-  --gain: 4 120 87; /* #047857 ganho (dado) */
-  --loss: 185 28 28; /* #B91C1C perda (dado) */
-  --warning: 180 83 9; /* #B45309 amber-700 */
-  --info: 29 78 216; /* #1D4ED8 blue-700 */
+  --gain: 4 120 87; /* #047857 */
+  --loss: 190 28 46; /* #BE1C2E */
+  --warning: 180 83 9; /* #B45309 */
+  --info: 13 110 190; /* #0D6EBE */
 }
 
-/* Tema ESCURO (marinho + evergreen clareado). */
+/* Tema ESCURO (Eclipse — tokens do spec). */
 .dark {
   color-scheme: dark;
-  --canvas: 12 22 38; /* #0C1626 marinho */
-  --surface: 18 32 51; /* #122033 */
-  --surface-raised: 22 38 60; /* #16263C */
-  --border: 36 55 80; /* #243750 */
-  --content: 234 240 247; /* #EAF0F7 */
-  --content-body: 182 196 214; /* #B6C4D6 */
-  --content-muted: 142 158 180; /* #8E9EB4 (contraste AA) */
-  --content-subtle: 132 146 168; /* #8492A8 (contraste AA) */
-  --brand: 31 158 120; /* #1F9E78 */
-  --brand-strong: 35 176 132; /* #23B084 */
-  --on-brand: 7 18 13; /* #07120D */
+  --canvas: 8 9 11; /* #08090B base */
+  --surface: 14 16 20; /* #0E1014 cards */
+  --chrome: 11 13 16; /* #0B0D10 rail/topbar/itens */
+  --surface-raised: 20 23 28; /* #14171C tooltip/realce */
+  --border: 32 36 43; /* #20242B */
+  --hairline: 22 25 31; /* #16191F divisórias finas */
+  --content: 242 244 247; /* #F2F4F7 */
+  --content-body: 166 172 184; /* #A6ACB8 */
+  --content-muted: 107 114 128; /* #6B7280 */
+  --content-subtle: 90 98 110; /* #5A626E */
+  --brand: 43 232 165; /* #2BE8A5 mint */
+  --brand-strong: 52 211 153; /* #34D399 */
+  --on-brand: 6 35 26; /* #06231A texto sobre o mint */
   --gain: 52 211 153; /* #34D399 */
   --loss: 251 113 133; /* #FB7185 */
-  --warning: 251 191 36; /* #FBBF24 amber-400 */
-  --info: 96 165 250; /* #60A5FA blue-400 */
+  --warning: 251 191 36; /* #FBBF24 */
+  --info: 91 200 245; /* #5BC8F5 */
 }
 
 body {
   @apply bg-canvas font-sans text-content-body antialiased;
-  /* Algarismos tabulares em todo número (colunas de R$/% alinham). */
-  font-feature-settings: 'tnum' 1, 'cv11' 1;
+  font-feature-settings: 'tnum' 1; /* algarismos tabulares em todo número */
 }
 
 @layer components {
-  /* Hierarquia de superfícies. Sombras sutis (o escuro separa por surface, não por sombra). */
-  .surface {
-    @apply rounded-2xl border border-border bg-surface;
-  }
-  .surface-elevated {
-    @apply rounded-2xl border border-border bg-surface-raised shadow-lg shadow-black/5;
-  }
+  /* Cards Eclipse: planos (separados por borda, sem sombra), raio 14px. */
   .card {
-    @apply rounded-2xl border border-border bg-surface p-4 shadow-sm shadow-black/5;
+    @apply rounded-[14px] border border-border bg-surface p-5;
   }
   .card-hero {
-    @apply rounded-2xl border border-border bg-surface-raised p-6 shadow-lg shadow-black/5;
+    @apply rounded-[14px] border border-border bg-surface;
   }
+  /* Eyebrow: rótulo uppercase espaçado (assinatura tipográfica do Eclipse). */
   .eyebrow {
-    @apply text-xs font-medium tracking-wide text-content-muted;
+    @apply text-[11.5px] font-semibold uppercase tracking-[0.12em] text-content-muted;
   }
   .label {
-    @apply text-xs font-medium uppercase tracking-wide text-content-muted;
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-content-muted;
   }
   .tnum {
     font-feature-settings: 'tnum' 1;
+  }
+}
+
+/* Slider custom (track + thumb mint) — usado nos controles da simulação. */
+.wlrange {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: rgb(var(--border));
+  outline: none;
+}
+.wlrange::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgb(var(--brand));
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgb(var(--brand) / 0.16);
+  transition: box-shadow 0.15s;
+}
+.wlrange::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 6px rgb(var(--brand) / 0.22);
+}
+.wlrange:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgb(var(--brand) / 0.16), 0 0 0 7px rgb(var(--brand) / 0.5);
+}
+.wlrange::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: rgb(var(--brand));
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgb(var(--brand) / 0.16);
+}
+
+@keyframes wlpulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes wldraw {
+  from {
+    stroke-dashoffset: 2400;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wldraw {
+    animation: none !important;
   }
 }
