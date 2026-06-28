@@ -38,7 +38,7 @@ export const INPUTS_PADRAO: SimInputs = {
   inflacaoAa: 0.04,
   valorMeta: 3_000_000,
   prazoMetaAnos: 30,
-  nCenarios: 10_000,
+  nCenarios: 3_000, // ~1s por run → recálculo ao vivo (debounce) viável e consistente
   rebalanceamento: 'ANUAL_AO_ALVO',
   df: 6,
   seed: 42,

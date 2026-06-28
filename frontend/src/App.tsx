@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { api } from './api/client'
 import type { HoldingDTO, Methodology } from './api/types'
@@ -11,7 +11,7 @@ import { RebalancePanel } from './components/RebalancePanel'
 import { RetirementPanel } from './components/RetirementPanel'
 import { ResultadoHero } from './components/ResultadoHero'
 import { RiskPanel } from './components/RiskPanel'
-import { MetodologiaSkeleton, ResultadosSkeleton } from './components/Skeletons'
+import { MetodologiaSkeleton } from './components/Skeletons'
 import { SimulationInputs } from './components/SimulationInputs'
 import { StressPanel } from './components/StressPanel'
 import { Skeleton } from './components/ui/Skeleton'
@@ -51,6 +51,20 @@ export default function App() {
     api.methodology().then(setMetodologia).catch(() => undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Recálculo ao vivo: ao mexer nos parâmetros (sliders/avançados), re-roda com debounce
+  // (~400ms). Pula a 1ª execução — a montagem acima já dispara o run inicial.
+  const primeiraVez = useRef(true)
+  useEffect(() => {
+    if (primeiraVez.current) {
+      primeiraVez.current = false
+      return
+    }
+    if (mostrarBoasVindas) return
+    const id = setTimeout(() => run(holdings, inputs), 400)
+    return () => clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputs])
 
   function simular() {
     setAba('dashboard')
@@ -187,45 +201,65 @@ function Dashboard({
   onEditCarteira: () => void
 }) {
   return (
-    <div className="space-y-6">
-      <SimulationInputs
-        holdings={holdings}
-        inputs={inputs}
-        onChange={onChange}
-        onRun={onRun}
-        onEditCarteira={onEditCarteira}
-        loading={loading}
-      />
+    <div className="space-y-5">
+      <div className="grid gap-5 lg:grid-cols-[360px_1fr] lg:items-stretch">
+        <SimulationInputs
+          holdings={holdings}
+          inputs={inputs}
+          onChange={onChange}
+          onRun={onRun}
+          onEditCarteira={onEditCarteira}
+          loading={loading}
+        />
 
-      {error ? (
-        <ErrorState detalhe={error} onRetry={onRun} />
-      ) : !data ? (
-        <ResultadosSkeleton />
-      ) : (
-        <Resultados data={data} inputs={inputs} holdings={holdings} loading={loading} />
-      )}
+        {error ? (
+          <ErrorState detalhe={error} onRetry={onRun} />
+        ) : !data ? (
+          <HeroSkeleton />
+        ) : (
+          <ResultadoHero
+            resumo={data.resumo}
+            risk={data.risk}
+            tese={montarTese(data.resumo, data.results.funil, inputs.horizonteAnos, inputs.valorMeta)}
+            horizonteAnos={inputs.horizonteAnos}
+          />
+        )}
+      </div>
+
+      {data && !error && <Resultados data={data} holdings={holdings} loading={loading} />}
+    </div>
+  )
+}
+
+function HeroSkeleton() {
+  return (
+    <div className="card-hero flex flex-col p-7 sm:p-[30px]" aria-hidden="true">
+      <Skeleton className="h-3 w-48" />
+      <Skeleton className="mt-4 h-12 w-2/5" />
+      <Skeleton className="mt-4 h-5 w-3/4" />
+      <Skeleton className="mt-6 h-2 w-full" />
+      <div className="mt-auto grid grid-cols-3 gap-3 pt-6">
+        <Skeleton className="h-12" />
+        <Skeleton className="h-12" />
+        <Skeleton className="h-12" />
+      </div>
     </div>
   )
 }
 
 function Resultados({
   data,
-  inputs,
   holdings,
   loading,
 }: {
   data: SimData
-  inputs: SimInputs
   holdings: HoldingDTO[]
   loading: boolean
 }) {
-  const { resumo, results, risk } = data
-  const tese = montarTese(resumo, results.funil, inputs.horizonteAnos, inputs.valorMeta)
+  const { results, risk } = data
 
   return (
     <>
-      <ResultadoHero resumo={resumo} risk={risk} tese={tese} />
-
       {loading && (
         <div className="flex items-center gap-2 text-xs text-content-muted" aria-live="polite">
           <span
