@@ -14,6 +14,7 @@ import { RiskPanel } from './components/RiskPanel'
 import { MetodologiaSkeleton } from './components/Skeletons'
 import { SimulationInputs } from './components/SimulationInputs'
 import { StressPanel } from './components/StressPanel'
+import { TrajectoryChart } from './components/TrajectoryChart'
 import { Skeleton } from './components/ui/Skeleton'
 import { ThemeToggle } from './components/ui/ThemeToggle'
 import { WelcomePanel } from './components/WelcomePanel'
@@ -22,9 +23,6 @@ import { CARTEIRA_EXEMPLO } from './lib/defaultPortfolio'
 
 // Gráficos carregados sob demanda: tiram o Plotly (~1,5MB) do bundle inicial, deixando
 // o first paint leve. Cada um cai num chunk próprio, buscado só quando há resultados.
-const MonteCarloFunnel = lazy(() =>
-  import('./components/MonteCarloFunnel').then((m) => ({ default: m.MonteCarloFunnel })),
-)
 const FinalHistogram = lazy(() =>
   import('./components/FinalHistogram').then((m) => ({ default: m.FinalHistogram })),
 )
@@ -226,7 +224,7 @@ function Dashboard({
         )}
       </div>
 
-      {data && !error && <Resultados data={data} holdings={holdings} loading={loading} />}
+      {data && !error && <Resultados data={data} inputs={inputs} holdings={holdings} loading={loading} />}
     </div>
   )
 }
@@ -249,10 +247,12 @@ function HeroSkeleton() {
 
 function Resultados({
   data,
+  inputs,
   holdings,
   loading,
 }: {
   data: SimData
+  inputs: SimInputs
   holdings: HoldingDTO[]
   loading: boolean
 }) {
@@ -272,20 +272,14 @@ function Resultados({
 
       <InsightsPanel insights={data.insights} />
 
-      <Secao titulo="Trajetória" sub="Como o patrimônio evolui ao longo do tempo e onde pode terminar">
-        <div className="card">
-          <h3 className="eyebrow mb-3">Projeção de Monte Carlo</h3>
-          <Suspense fallback={<Skeleton className="h-80 w-full" />}>
-            <MonteCarloFunnel funil={results.funil} />
-          </Suspense>
-        </div>
-        <div className="card">
-          <h3 className="eyebrow mb-3">Distribuição dos patrimônios finais</h3>
-          <Suspense fallback={<Skeleton className="h-72 w-full" />}>
-            <FinalHistogram histograma={results.histograma} />
-          </Suspense>
-        </div>
-      </Secao>
+      <TrajectoryChart funil={results.funil} meta={inputs.valorMeta} horizonteAnos={inputs.horizonteAnos} />
+
+      <div className="card p-[22px]">
+        <div className="mb-3 text-[15px] font-semibold text-content">Distribuição dos patrimônios finais</div>
+        <Suspense fallback={<Skeleton className="h-72 w-full" />}>
+          <FinalHistogram histograma={results.histograma} />
+        </Suspense>
+      </div>
 
       <Secao titulo="Risco" sub="Quanto pode cair e de onde vem o risco da carteira">
         <div className="grid gap-6 lg:grid-cols-2">
